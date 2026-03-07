@@ -1082,10 +1082,10 @@ void StartTask2(void const * argument)
       RunningTask=1;
     }
     if(RunningTask==1){
-      MotorSetOutput(&fric1, speedMode, -5600);
-      MotorSetOutput(&fric2, speedMode, -5600);
-      MotorSetOutput(&fric3, speedMode, 5600);
-      MotorSetOutput(&fric4, speedMode, 5600);
+      //MotorSetOutput(&fric1, speedMode, -5600);
+      //MotorSetOutput(&fric2, speedMode, -5600);
+      //MotorSetOutput(&fric3, speedMode, 5600);
+      //MotorSetOutput(&fric4, speedMode, 5600);
       MotorRunSpeedTimeBlocking(&lift,30000,3500);
       osDelay(1000);
       MotorSetOutput(&fric1, speedMode, 100);
