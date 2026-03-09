@@ -82,6 +82,12 @@ typedef struct{
   Pid anglePid,speedPid,torquePid;
 }Motor;//对应每个电机的结构体
 
+typedef struct{
+  double yaw;
+  double v1Speed;
+  double v2Speed;
+}dartParam;//每发飞镖的发射参数结构体
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -100,7 +106,7 @@ void MotorSafetyInit(Motor *motor, uint8_t maxTemp, double maxTorque, double sta
 //初始化电机安全保护参数
 void MotorRunToStall(Motor *motor, double speed);//以指定速度运行电机直到堵转
 void MotorSetOutput(Motor *motor, enum MotorMode mode, double value);//设置输出
-void MotorRunToAngle(Motor *motor, double angle, double speed);//以指定角度运行电机
+void MotorRunToAngleBlocking(Motor *motor, double angle, double speed);//以指定角度运行电机
 void MotorRunSpeedTime(Motor *motor, double speed, uint32_t time);//以指定速度运行指定时间
 void MotorRunSpeedTimeBlocking(Motor *motor, double speed, uint32_t time);//以指定速度运行指定时间(阻塞)
 void CAN_SendMessage(uint8_t *data, uint32_t StdId);//发送CAN消息
@@ -121,6 +127,8 @@ void SingingSome();//唱一小段
     uint8_t CDC_Ctrl_state = 0; // CDC使能标志
     uint8_t RunningTask = 0;// 运行任务标志
     uint8_t MotorUpdateFlag = 1; // 电机更新标志
+
+    dartParam dartParam_array[4];//飞镖参数数组
 
     MotorSend _1FE={{0x00},0x1FE},
     _1FF={{0x00},0x1FF},
@@ -452,6 +460,13 @@ void PidInit(Pid *pid,double Kp,double Ki,double Kd,double maxOutput,double dead
   pid->intergralLimit=intergralLimit;
 }
 
+void dartParamInit(){
+  for(int i=0;i<4;i++){
+    dartParam_array[i].yaw = 245000;
+    dartParam_array[i].v1Speed = 0;
+    dartParam_array[i].v2Speed = 0;
+  }
+}
 
 
 //设置输出
@@ -508,7 +523,7 @@ void MotorRunToStall(Motor *motor, double speed){
 }
 
 //使电机到指定角度
-void MotorRunToAngle(Motor *motor, double angle, double speed){
+void MotorRunToAngleBlocking(Motor *motor, double angle, double speed){
   if(motor->motorState.angle < angle){
     motor->motorState.motorMode = speedMode;
     motor->speedPid.setpoint = fabs(speed);
@@ -611,6 +626,12 @@ void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
     Byte 0: 0x01 (System Command)
       Byte 1: 0x00 = Emergency Stop -> alarm_level=3, disable all motors
       Byte 1: Other = Set RunningTask
+    Byte 0: 0x02 (Value Set)
+      Byte 1: 0x00 (dartParam Set)//设置的参数是飞镖发射参数
+        Byte 2: Dart ID (0-3)
+          Byte 3-4: Dart's yaw value (double, Big Endian)
+          Byte 5-6: Dart's v1Speed (double, Big Endian)
+          Byte 7-8: Dart's v2Speed (double, Big Endian)
     ///////////////////////////////
     反馈数据包（发送给上位机）
     Byte 0: 0x81 (Header)
@@ -697,6 +718,30 @@ void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
             }
         } else {
             RunningTask = Buf[1];
+        }
+    }
+    else if (Len >= 15 && Buf[0] == 0x02) {
+        // Value Set
+        // Byte 1: 0x00 (dartParam Set)
+        if (Buf[1] == 0x00) {
+            uint8_t dart_id = Buf[2];
+            if (dart_id < 4) {
+                 // Byte 3-10: Dart's yaw value (double, Big Endian from Python)
+                 uint8_t temp[8];
+                 for(int i=0; i<8; i++) temp[i] = Buf[10 - i]; // Reverse for Little Endian
+                 
+                 double yaw_val;
+                 memcpy(&yaw_val, temp, 8);
+                 
+                 // Byte 11-12: Dart's v1Speed
+                 int16_t v1_val = (int16_t)((Buf[11] << 8) | Buf[12]);
+                 // Byte 13-14: Dart's v2Speed
+                 int16_t v2_val = (int16_t)((Buf[13] << 8) | Buf[14]);
+                 
+                 dartParam_array[dart_id].yaw = yaw_val + 245000.0;//245000 is 0
+                 dartParam_array[dart_id].v1Speed = (double)v1_val;
+                 dartParam_array[dart_id].v2Speed = (double)v2_val;
+            }
         }
     }
 
@@ -1027,6 +1072,8 @@ void StartTask2(void const * argument)
   MotorSetOutput(&lift, speedMode, 0);
   MotorSetOutput(&load, speedMode, 0);
 
+  dartParamInit(); // 初始化飞镖发射参数
+
   // 4. 初始化外部速度环 PID (外环)
   // 参数: Kp=1.0, Ki=0.0, Kd=0.0 (需根据实际调优), MaxOut=8191(角度最大值), Deadband=0, I_Limit=0
   //PidInit(&outerSpeedPid, 1.0, 0.0, 0.0, 8191.0, 0.0, 0.0);
@@ -1044,14 +1091,14 @@ void StartTask2(void const * argument)
   //SingingSome();//播放部分音乐以示启动
   MotorRunToStall(&GM6020,-300);
   GM6020.motorState.angle=0;
-  MotorRunToAngle(&GM6020,245000,300);
+  MotorRunToAngleBlocking(&GM6020,245000,300);
   //MotorRunToStall(&lift,6000);
   MotorRunToStall(&lift,-6000);
   osDelay(100);
   lift.motorState.angle=0;
   lift.motorState.isStalled=0;
     MotorRunSpeedTimeBlocking(&lift,3000,500);
-  //MotorRunToAngle(&lift,0,300);
+  //MotorRunToAngleBlocking(&lift,0,300);
   MotorRunToStall(&load,3000);
   osDelay(100);
   MotorRunToStall(&load,-3000);
@@ -1077,10 +1124,10 @@ void StartTask2(void const * argument)
   /* Infinite loop */
   for(;;)
   {//RunningTask执行的任务在此处编写
-    if(fabs(lift.motorState.rpm)>600){
+    /* if(fabs(lift.motorState.rpm)>600){
       osDelay(1000);
       RunningTask=1;
-    }
+    } */
     if(RunningTask==1){
       //MotorSetOutput(&fric1, speedMode, -5600);
       //MotorSetOutput(&fric2, speedMode, -5600);
@@ -1100,8 +1147,8 @@ void StartTask2(void const * argument)
     }
     if(RunningTask==2){
       /* while(RunningTask==2){
-        MotorRunToAngle(&GM6020,400000,600);
-        MotorRunToAngle(&GM6020,10000,600);
+        MotorRunToAngleBlocking(&GM6020,400000,600);
+        MotorRunToAngleBlocking(&GM6020,10000,600);
       }
  */
       osDelay(10000);
@@ -1123,6 +1170,47 @@ void StartTask2(void const * argument)
     }
     if(RunningTask==4){
       //在此处写程序
+      //连发程序
+      MotorSetOutput(&fric1, speedMode, -dartParam_array[0].v1Speed);
+      MotorSetOutput(&fric2, speedMode, -dartParam_array[0].v2Speed);
+      MotorSetOutput(&fric3, speedMode, dartParam_array[0].v1Speed);
+      MotorSetOutput(&fric4, speedMode, dartParam_array[0].v2Speed);
+      MotorRunToAngleBlocking(&GM6020,dartParam_array[0].yaw,300);
+      MotorRunToStall(&load,-3000);
+      MotorRunSpeedTimeBlocking(&lift,30000,2000);
+      MotorSetOutput(&fric1, speedMode, -dartParam_array[1].v1Speed);
+      MotorSetOutput(&fric2, speedMode, -dartParam_array[1].v2Speed);
+      MotorSetOutput(&fric3, speedMode, dartParam_array[1].v1Speed);
+      MotorSetOutput(&fric4, speedMode, dartParam_array[1].v2Speed);
+      MotorRunToAngleBlocking(&GM6020,dartParam_array[1].yaw,300);
+      MotorRunSpeedTimeBlocking(&lift,30000,1500);
+      MotorSetOutput(&fric1, speedMode, 100);
+      MotorSetOutput(&fric2, speedMode, 100);
+      MotorSetOutput(&fric3, speedMode, -100);
+      MotorSetOutput(&fric4, speedMode, -100);
+      MotorRunSpeedTimeBlocking(&lift,-30000,2500);
+      MotorRunToStall(&lift,-6000);
+
+      MotorSetOutput(&fric1, speedMode, -dartParam_array[2].v1Speed);
+      MotorSetOutput(&fric2, speedMode, -dartParam_array[2].v2Speed);
+      MotorSetOutput(&fric3, speedMode, dartParam_array[2].v1Speed);
+      MotorSetOutput(&fric4, speedMode, dartParam_array[2].v2Speed);
+      MotorRunToAngleBlocking(&GM6020,dartParam_array[2].yaw,300);
+      MotorRunToStall(&load,3000);
+      MotorRunSpeedTimeBlocking(&lift,30000,2000);
+      MotorSetOutput(&fric1, speedMode, -dartParam_array[3].v1Speed);
+      MotorSetOutput(&fric2, speedMode, -dartParam_array[3].v2Speed);
+      MotorSetOutput(&fric3, speedMode, dartParam_array[3].v1Speed);
+      MotorSetOutput(&fric4, speedMode, dartParam_array[3].v2Speed);
+      MotorRunToAngleBlocking(&GM6020,dartParam_array[3].yaw,300);
+      MotorRunSpeedTimeBlocking(&lift,30000,1500);
+      MotorSetOutput(&fric1, speedMode, 100);
+      MotorSetOutput(&fric2, speedMode, 100);
+      MotorSetOutput(&fric3, speedMode, -100);
+      MotorSetOutput(&fric4, speedMode, -100);
+      MotorRunSpeedTimeBlocking(&lift,-30000,2500);
+      MotorRunToStall(&lift,-6000);
+      
       RunningTask=0;
     }
     //alarm_level = 2; // 测试报警

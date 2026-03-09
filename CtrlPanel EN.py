@@ -52,6 +52,16 @@ class MotorControlApp:
             "RunToAngle (0x06)": 6,
             "SpeedTime (0x07)": 7
         }
+
+        # 飞镖参数存储 (Yaw, V1, V2)
+        # Defaults based on protocol/usage
+        self.dart_params = []
+        for i in range(4):
+            self.dart_params.append({
+                'yaw': tk.DoubleVar(value=0.0), # Default yaw
+                'v1': tk.IntVar(value=4000),
+                'v2': tk.IntVar(value=4000)
+            })
         
         self.create_ui()
         
@@ -63,18 +73,111 @@ class MotorControlApp:
         paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
         paned.pack(fill=tk.BOTH, expand=True)
         
-        # 左侧：电机状态监控栏
-        frame_monitor = ttk.LabelFrame(paned, text="Motor Status Monitor", width=420)
-        paned.add(frame_monitor, weight=1)
+        # 左侧容器 (Vertical layout for Monitor + Dart Params)
+        left_pane = ttk.Frame(paned, width=420)
+        paned.add(left_pane, weight=1)
+        
+        # 左侧上部：电机状态监控栏
+        frame_monitor = ttk.LabelFrame(left_pane, text="Motor Status Monitor")
+        frame_monitor.pack(fill="both", expand=True, padx=5, pady=5)
         
         # 创建左侧监控表格
         self.create_monitor_panel(frame_monitor)
+        
+        # 左侧下部：飞镖参数设置
+        frame_dart = ttk.LabelFrame(left_pane, text="Dart Launch Params")
+        frame_dart.pack(fill="x", padx=5, pady=5)
+        
+        self.create_dart_params_panel(frame_dart)
         
         # 右侧：原有控制面板
         frame_control = ttk.Frame(paned)
         paned.add(frame_control, weight=2)
         
         self.create_control_panel(frame_control)
+    
+    def create_dart_params_panel(self, parent):
+        # Grid Header
+        headers = ["Dart", "Yaw (Double)", "V1 Speed", "V2 Speed", "Action"]
+        for col, text in enumerate(headers):
+            ttk.Label(parent, text=text, font=('', 9, 'bold')).grid(row=0, column=col, padx=4, pady=5)
+            
+        # Rows for Darts 0-3
+        for i in range(4):
+            # ID
+            ttk.Label(parent, text=f"Dart {i}").grid(row=i+1, column=0, padx=5, pady=2)
+            
+            # Yaw (Use DoubleVar now)
+            ttk.Entry(parent, textvariable=self.dart_params[i]['yaw'], width=10).grid(row=i+1, column=1, padx=2)
+            
+            # V1
+            ttk.Entry(parent, textvariable=self.dart_params[i]['v1'], width=8).grid(row=i+1, column=2, padx=2)
+            
+            # V2
+            ttk.Entry(parent, textvariable=self.dart_params[i]['v2'], width=8).grid(row=i+1, column=3, padx=2)
+            
+            # Set Button
+            btn = ttk.Button(parent, text="Set", width=6, 
+                             command=lambda idx=i: self.set_dart_param(idx))
+            btn.grid(row=i+1, column=4, padx=5, pady=2)
+        
+        # Task 4 Execution Button
+        frame_action = ttk.Frame(parent)
+        frame_action.grid(row=5, column=0, columnspan=5, pady=10, sticky="ew")
+        
+        btn_exec = ttk.Button(frame_action, text="Run Continuous Launch (Task 4)", 
+                              command=self.action_run_task_4)
+        btn_exec.pack(fill="x", padx=10)
+
+    def set_dart_param(self, dart_id):
+        # Protocol: 
+        # Byte 0: 0x02
+        # Byte 1: 0x00
+        # Byte 2: ID
+        # Byte 3-10: Yaw (Double, Big Endian)
+        # Byte 11-12: V1 (int16)
+        # Byte 13-14: V2 (int16)
+        try:
+            p = self.dart_params[dart_id]
+            yaw = float(p['yaw'].get())
+            v1 = int(p['v1'].get())
+            v2 = int(p['v2'].get())
+            
+            # Clamp int16 for speeds
+            v1 = max(-32768, min(32767, v1))
+            v2 = max(-32768, min(32767, v2))
+            
+            if not self.connected or not self.ser:
+                return
+
+            packet = struct.pack('>BBBdh h', 0x02, 0x00, dart_id, yaw, v1, v2)
+            
+            self.ser.write(packet)
+            self.log(f"Set Dart {dart_id}: Yaw={yaw}, V1={v1}, V2={v2}", "blue")
+            
+        except ValueError:
+            messagebox.showerror("Error", "Invalid inputs")
+        except Exception as e:
+            self.log(f"Set Param Error: {e}", "red")
+
+    def action_run_task_4(self):
+        # First, set all dart params automatically
+        try:
+            if not self.connected or not self.ser: 
+                self.log("Not connected", "red")
+                return
+                
+            for i in range(4):
+                self.set_dart_param(i)
+                time.sleep(0.02) # Small delay to prevent buffer overflow
+
+            # Then trigger task 4
+            packet = struct.pack('BB', 0x01, 0x04)
+            self.ser.write(packet)
+            self.log(">>> Params Set & Task 4 Triggered <<<", "green")
+            
+        except Exception as e:
+            self.log(f"Auto Launch Error: {e}", "red")
 
     def create_monitor_panel(self, parent):
         # 使用 Canvas + Scrollbar 以防展示不全
