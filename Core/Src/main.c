@@ -1112,15 +1112,15 @@ void StartTask2(void const * argument)
   MotorSetOutput(&fric3, speedMode, 4000);
   MotorSetOutput(&fric4, speedMode, 4000);
   osDelay(1000);
-  MotorSetOutput(&fric1, speedMode, 0);
-  MotorSetOutput(&fric2, speedMode, 0);
-  MotorSetOutput(&fric3, speedMode, 0);
-  MotorSetOutput(&fric4, speedMode, 0);
+  MotorSetOutput(&fric1, speedMode, 100);
+  MotorSetOutput(&fric2, speedMode, 100);
+  MotorSetOutput(&fric3, speedMode, -100);
+  MotorSetOutput(&fric4, speedMode, -100);
   HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET); // 指示准备完成
   alarm_level=0;
   CDC_Ctrl_state = 1; // CDC 连接完成，允许接收控制命令
-  ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////  
   /* Infinite loop */
   for(;;)
   {//RunningTask执行的任务在此处编写
@@ -1133,7 +1133,7 @@ void StartTask2(void const * argument)
       //MotorSetOutput(&fric2, speedMode, -5600);
       //MotorSetOutput(&fric3, speedMode, 5600);
       //MotorSetOutput(&fric4, speedMode, 5600);
-      MotorRunSpeedTimeBlocking(&lift,30000,3500);
+      MotorRunSpeedTimeBlocking(&lift,30000,4000);
       osDelay(1000);
       MotorSetOutput(&fric1, speedMode, 100);
       MotorSetOutput(&fric2, speedMode, 100);
@@ -1152,7 +1152,7 @@ void StartTask2(void const * argument)
       }
  */
       osDelay(10000);
-      MotorRunSpeedTimeBlocking(&lift,30000,3500);
+      MotorRunSpeedTimeBlocking(&lift,30000,4000);
       osDelay(1000);
       MotorSetOutput(&fric1, speedMode, 100);
       MotorSetOutput(&fric2, speedMode, 100);
@@ -1183,12 +1183,12 @@ void StartTask2(void const * argument)
       MotorSetOutput(&fric3, speedMode, dartParam_array[1].v1Speed);
       MotorSetOutput(&fric4, speedMode, dartParam_array[1].v2Speed);
       MotorRunToAngleBlocking(&GM6020,dartParam_array[1].yaw,300);
-      MotorRunSpeedTimeBlocking(&lift,30000,1500);
+      MotorRunSpeedTimeBlocking(&lift,30000,1700);
       MotorSetOutput(&fric1, speedMode, 100);
       MotorSetOutput(&fric2, speedMode, 100);
       MotorSetOutput(&fric3, speedMode, -100);
       MotorSetOutput(&fric4, speedMode, -100);
-      MotorRunSpeedTimeBlocking(&lift,-30000,2500);
+      MotorRunSpeedTimeBlocking(&lift,-30000,3000);
       MotorRunToStall(&lift,-6000);
 
       MotorSetOutput(&fric1, speedMode, -dartParam_array[2].v1Speed);
@@ -1203,13 +1203,14 @@ void StartTask2(void const * argument)
       MotorSetOutput(&fric3, speedMode, dartParam_array[3].v1Speed);
       MotorSetOutput(&fric4, speedMode, dartParam_array[3].v2Speed);
       MotorRunToAngleBlocking(&GM6020,dartParam_array[3].yaw,300);
-      MotorRunSpeedTimeBlocking(&lift,30000,1500);
+      MotorRunSpeedTimeBlocking(&lift,30000,1700);
       MotorSetOutput(&fric1, speedMode, 100);
       MotorSetOutput(&fric2, speedMode, 100);
       MotorSetOutput(&fric3, speedMode, -100);
       MotorSetOutput(&fric4, speedMode, -100);
-      MotorRunSpeedTimeBlocking(&lift,-30000,2500);
+      MotorRunSpeedTimeBlocking(&lift,-30000,3000);
       MotorRunToStall(&lift,-6000);
+      MotorRunToStall(&load,-3000);
       
       RunningTask=0;
     }
