@@ -34,7 +34,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct{
+typedef struct{//PID结构体
   double Kp;  
   double Ki;
   double Kd;
@@ -43,17 +43,20 @@ typedef struct{
   double integral;
   double output;
   double maxOutput;
-  double deadband;
+  double deadband;//误差死区，当近似达到目标就不再计算输出，防止持续微调
   double intergralLimit;
   double setpoint;
   double *outputAdress;
   double *inputAdress;
 }Pid;//
+
 typedef struct{
   uint8_t data[8];
   uint32_t StdId;
 }MotorSend;//对应标志位的要发送的数据结构体
+
 enum MotorMode{disable,currentMode,angleMode,speedMode,torqueMode,runToAngle,runToStallMode,speedTimeMode};
+
 typedef struct{
   uint16_t singleAngle;
   double rpm;
@@ -64,10 +67,11 @@ typedef struct{
   uint8_t isStalled; // 是否堵转
   uint32_t stallTimer; // 堵转计时
 }MotorState;//存储电机状态的结构体
+
 typedef struct{
   double output;
   uint32_t StdId;
-  uint8_t motor_byte;
+  uint8_t motor_byte;//电机标志位
   uint8_t enabled; //使能
   int8_t maxTemp; // 温度阈值
   double maxTorque; // 转矩阈值
@@ -226,7 +230,7 @@ int main(void)
   }
   HAL_TIM_Base_Start_IT(&htim2); 
 
-  htim2.Instance->ARR = 999;
+  htim2.Instance->ARR = 999;//设置自动重装载值，决定发送频率，999对应100Hz
   // 配置 CAN 接收过滤器(不过滤，接收所有)
   CAN_FilterTypeDef sFilterConfig;
   sFilterConfig.FilterBank = 14; // CAN2 的过滤器组起始通常为 14
@@ -335,10 +339,10 @@ void CAN_SendMessage(uint8_t *data, uint32_t StdId) {
   TxHeader.ExtId = 0;
   TxHeader.IDE = CAN_ID_STD;
   TxHeader.RTR = CAN_RTR_DATA;
-  TxHeader.DLC = 8;
-  TxHeader.TransmitGlobalTime = DISABLE;
+  TxHeader.DLC = 8;//数据长度，8字节
+  TxHeader.TransmitGlobalTime = DISABLE;//不发送全局时间戳
 
-  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, data, &TxMailbox) != HAL_OK) {
+  if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, data, &TxMailbox) != HAL_OK) {//发送函数
     //Error_Handler();
   }
   if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, data, &TxMailbox) != HAL_OK) {
@@ -351,11 +355,11 @@ void CanSendMotor(MotorSend *motorsend){
 CAN_SendMessage(motorsend->data,motorsend->StdId);
 }
 void RecReceiveMotor(Motor *motor,uint8_t *data){//接收对应的电机数据
-  motor->motorState.rpm=(double)(int16_t)((data[2]<<8)|data[3]);
-  motor->motorState.torque=(double)(int16_t)((data[4]<<8)|data[5]);
+  motor->motorState.rpm=(double)(int16_t)((data[2]<<8)|data[3]);//转速解析
+  motor->motorState.torque=(double)(int16_t)((data[4]<<8)|data[5]);//扭矩解析
   motor->motorState.tempr=(int8_t)data[6];
-  int deltaAngle = (int)(((uint16_t)data[0]<<8)|data[1])-(int)motor->motorState.singleAngle;
-  motor->motorState.singleAngle = ((uint16_t)data[0]<<8)|data[1];
+  int deltaAngle = (int)(((uint16_t)data[0]<<8)|data[1])-(int)motor->motorState.singleAngle;//角度增量
+  motor->motorState.singleAngle = ((uint16_t)data[0]<<8)|data[1];//记录当前角度
   if(abs(deltaAngle) < 4096) motor->motorState.angle += deltaAngle;
 }
 
@@ -375,7 +379,7 @@ void TransferToMotorSend(Motor *motor){
 }
 
 // CAN 接收中断回调函数
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//HAL库接收中断回调
 {
   CAN_RxHeaderTypeDef RxHeader;
   uint8_t RxData[8];
@@ -567,7 +571,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   if(GPIO_Pin == KEY_Pin){
     alarm_level = 3; // 设置最高优先级报警（按键触发）
     for(int i=0;i<MOTOR_NUM;i++){
-      motor_array[i]->enabled=0;
+      motor_array[i]->enabled=0;//将电机全部急停
     }
   }
 }
@@ -590,7 +594,7 @@ void MotorCdcFeedback(uint8_t motor_SN){
   feedback[11]=(int32_t)motor->motorState.angle>>16;
   feedback[12]=(int32_t)motor->motorState.angle>>8;
   feedback[13]=(int32_t)motor->motorState.angle&0xFF;
-  CDC_Transmit_FS(feedback,14);
+  CDC_Transmit_FS(feedback,14);//发送反馈数据包到上位机，长度14字节
 }
 
 void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
@@ -751,7 +755,7 @@ void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
 }
 
 #define LENGTH 624
-const uint8_t Music_Score[LENGTH]={
+const uint8_t Music_Score[LENGTH]={//校歌乐谱数据，用在Singing函数中
 	
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,60,65,65,69,69,74,74,74,74,74,74,74,74,74,74,74,74,72,72,72,72,72,72,72,72,72,72,70,70,69,69,69,69,69,69,67,67,67,67,69,69,62,62,62,62,62,0,64,64,64,64,62,62,60,60,60,60,60,60,72,72,72,70,70,70,69,69,69,67,67,67,67,67,67,69,69,69,65,65,65,65,65,0,65,65,0,65,65,0,65,65,65,0,0,0,60,60,0,60,60,60,65,65,65,65,65,65,67,67,67,67,67,67,69,69,69,69,69,69,67,67,67,69,69,69,67,67,67,67,67,67,65,65,65,65,65,65,64,64,64,62,62,62,62,62,62,64,64,64,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,62,62,0,62,62,62,67,67,67,67,67,67,69,69,69,69,69,69,70,70,70,70,70,70,74,74,0,74,74,74,72,72,72,72,72,72,65,65,65,65,65,65,70,70,70,69,69,69,69,69,69,65,65,65,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,69,69,69,70,70,70,72,72,72,72,72,72,72,72,72,72,72,0,72,72,72,72,72,72,70,70,0,70,70,70,69,69,69,69,69,69,65,65,65,65,65,65,64,64,64,64,64,64,65,65,65,65,65,65,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,67,67,67,69,69,69,70,70,70,70,70,70,70,70,70,70,70,70,74,74,74,74,74,74,72,72,72,74,74,74,72,72,72,72,72,72,70,70,70,70,70,70,69,69,69,67,67,67,67,67,67,69,69,69,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,65,74,74,74,74,74,74,74,74,0,74,74,74,72,72,0,72,72,72,65,65,65,67,67,67,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,74,74,74,74,74,74,74,74,0,74,74,74,72,72,0,72,72,72,65,65,65,67,67,67,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,69,70,70,70,0,70,70,69,69,69,65,65,65,62,62,62,62,62,62,62,62,62,62,62,62,70,70,70,0,70,70,69,69,69,65,65,65,62,62,62,62,62,62,60,60,0,60,60,60,65,65,65,65,65,65,69,69,69,69,69,69,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,74,72,72,0,72,72,72,72,72,72,70,70,70,69,69,69,67,67,67,67,67,67,69,69,69,65,65,65,65,65,65,65,65,65,65,65,65
 	
@@ -788,7 +792,7 @@ void Singing(){
   return;
 }
 
-#define LENGTH_SOME 93
+#define LENGTH_SOME 93//校歌片段乐谱数据，用在SingingSome函数中
 const uint8_t Music_Score_Some[LENGTH_SOME]={
 	
 	60,60,65,65,69,69,74,74,74,74,74,74,74,74,74,74,74,74,72,72,72,72,72,72,72,72,72,72,70,70,69,69,69,69,69,69,67,67,67,67,69,69,62,62,62,62,62,0,64,64,64,64,62,62,60,60,60,60,60,60,72,72,72,70,70,70,69,69,69,67,67,67,67,67,67,69,69,69,65,65,65,65,65,0,65,65,0,65,65,0,65,65,65
@@ -844,10 +848,11 @@ void MotorUpdate(void const * argument)
   for(;;)
   {
     
-    // alarm_level 不在每次循环重置，保持报警状态直到系统复位或手动清除
+    // alarm_level 不在每次循环重置，保持报警状态直到系统复位或手动清除，
+      //所以若电机因安全问题被禁用，请按复位键重置系统
 
     for(int i=0;i<MOTOR_NUM;i++){
-      Motor *m = motor_array[i];
+      Motor *m = motor_array[i];//遍历每一个电机来更新数据
       // PID calculation moved to StartPidTask
       if(m->motorState.motorMode == disable){
         m->motorState.isStalled = 0; // Clear stalled flag
@@ -1008,7 +1013,7 @@ void MotorUpdate(void const * argument)
 }
 
 //CDC发送反馈报文Task
-void StartCdcTask(void const * argument)
+void StartCdcTask(void const * argument)//上位机通信任务，负责发送电机状态反馈数据包到上位机
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
