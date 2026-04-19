@@ -59,10 +59,15 @@ enum MotorMode{disable,currentMode,angleMode,speedMode,torqueMode,runToAngle,run
 
 typedef struct{
   uint16_t singleAngle;
+  double rpmRaw; 
+  double torqueRaw;
   double rpm;
   double torque;
   int8_t tempr;
   double angle;
+  int16_t rpmHistory[3];
+  int16_t torqueHistory[3];
+  uint8_t filterReady;
   enum MotorMode motorMode;
   uint8_t isStalled; // 是否堵转
   uint32_t stallTimer; // 堵转计时
@@ -98,6 +103,8 @@ typedef struct{
 /* USER CODE BEGIN PD */
   #define MOTOR_SEND_NUM 3
   #define MOTOR_NUM 7
+  #define SPEED_FILTER_ALPHA 0.25  //速度滤波系数，alpha 越小，越稳但响应更慢·
+  #define TORQUE_FILTER_ALPHA 0.30  //转矩滤波系数，alpha 越小，越稳但响应更慢·
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -117,6 +124,9 @@ void CAN_SendMessage(uint8_t *data, uint32_t StdId);//发送CAN消息
 void TransferToMotorSend(Motor *motor);//根据电机的StdId来决定发送到哪个MotorSend结构体中
 void CanSendMotor(MotorSend *motorsend);//发送对应的MotorSend结构体
 void MotorCdcFeedback(uint8_t motor_SN);//发送motor_array对应序号电机的反馈信息到CDC
+
+static int16_t Median3Int16(int16_t a, int16_t b, int16_t c);
+static double FirstOrderFilter(double prev, double current, double alpha);
 
 void Singing();//整活
 void SingingSome();//唱一小段
@@ -354,9 +364,69 @@ void CAN_SendMessage(uint8_t *data, uint32_t StdId) {
 void CanSendMotor(MotorSend *motorsend){
 CAN_SendMessage(motorsend->data,motorsend->StdId);
 }
+
+static int16_t Filter_Find_Median_in_three(int16_t a, int16_t b, int16_t c){//进行一阶滤波，返回中值数
+  if (a > b) {
+    int16_t t = a;
+    a = b;
+    b = t;
+  }
+  if (b > c) {
+    int16_t t = b;
+    b = c;
+    c = t;
+  }
+  if (a > b) {
+    int16_t t = a;
+    a = b;
+    b = t;
+  }
+  return b;
+}
+
+static double Filter_calculate(double prev, double current, double alpha){
+  return prev + alpha * (current - prev);
+}
+
 void RecReceiveMotor(Motor *motor,uint8_t *data){//接收对应的电机数据
-  motor->motorState.rpm=(double)(int16_t)((data[2]<<8)|data[3]);//转速解析
-  motor->motorState.torque=(double)(int16_t)((data[4]<<8)|data[5]);//扭矩解析
+  int16_t rpm_raw = (int16_t)((data[2]<<8)|data[3]);
+  int16_t torque_raw = (int16_t)((data[4]<<8)|data[5]);
+
+  motor->motorState.rpmRaw = (double)rpm_raw;
+  motor->motorState.torqueRaw = (double)torque_raw;
+
+  if (motor->motorState.filterReady == 0) {
+    for (int i = 0; i < 3; i++) {
+      motor->motorState.rpmHistory[i] = rpm_raw;
+      motor->motorState.torqueHistory[i] = torque_raw;
+    }
+    motor->motorState.rpm = (double)rpm_raw;
+    motor->motorState.torque = (double)torque_raw;
+    motor->motorState.filterReady = 1;
+  } else {
+    motor->motorState.rpmHistory[0] = motor->motorState.rpmHistory[1];
+    motor->motorState.rpmHistory[1] = motor->motorState.rpmHistory[2];
+    motor->motorState.rpmHistory[2] = rpm_raw;
+
+    motor->motorState.torqueHistory[0] = motor->motorState.torqueHistory[1];
+    motor->motorState.torqueHistory[1] = motor->motorState.torqueHistory[2];
+    motor->motorState.torqueHistory[2] = torque_raw;
+
+    double rpm_median = (double)Filter_Find_Median_in_three(
+      motor->motorState.rpmHistory[0],
+      motor->motorState.rpmHistory[1],
+      motor->motorState.rpmHistory[2]
+    );
+    double torque_median = (double)Filter_Find_Median_in_three(
+      motor->motorState.torqueHistory[0],
+      motor->motorState.torqueHistory[1],
+      motor->motorState.torqueHistory[2]
+    );
+
+    motor->motorState.rpm = Filter_calculate(motor->motorState.rpm, rpm_median, SPEED_FILTER_ALPHA);
+    motor->motorState.torque = Filter_calculate(motor->motorState.torque, torque_median, TORQUE_FILTER_ALPHA);
+  }
+
   motor->motorState.tempr=(int8_t)data[6];
   int deltaAngle = (int)(((uint16_t)data[0]<<8)|data[1])-(int)motor->motorState.singleAngle;//角度增量
   motor->motorState.singleAngle = ((uint16_t)data[0]<<8)|data[1];//记录当前角度
@@ -421,9 +491,18 @@ void MotorInit(Motor *motor,uint32_t StdId,uint8_t motor_byte)
   motor->motor_byte=motor_byte;
   motor->motorState.motorMode=disable;
   motor->motorState.singleAngle=0;
+  motor->motorState.rpmRaw=0;
+  motor->motorState.torqueRaw=0;
   motor->motorState.angle=0;
   motor->motorState.rpm=0;
   motor->motorState.torque=0;
+  motor->motorState.rpmHistory[0]=0;
+  motor->motorState.rpmHistory[1]=0;
+  motor->motorState.rpmHistory[2]=0;
+  motor->motorState.torqueHistory[0]=0;
+  motor->motorState.torqueHistory[1]=0;
+  motor->motorState.torqueHistory[2]=0;
+  motor->motorState.filterReady=0;
   motor->motorState.tempr=0;
   motor->enabled = 1;
   motor->maxTemp = 35;
