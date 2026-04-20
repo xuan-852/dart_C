@@ -21,6 +21,7 @@ virtualFolder:
             - name: Core
               files:
                 - path: ../Core/Src/main.c
+                - path: ../Core/Src/Filter.c
                 - path: ../Core/Src/gpio.c
                 - path: ../Core/Src/freertos.c
                 - path: ../Core/Src/can.c
