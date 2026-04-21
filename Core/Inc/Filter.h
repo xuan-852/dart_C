@@ -35,8 +35,8 @@ struct filter {//滤波器基对象
 };
 
 int Filter_Init(filter_t *me, filter_type_t type, float cutoff_freq, float sample_rate);
-void Filter_update(filter_t *me, float input);
-float Filter_get_output(filter_t *me);
+void Filter_update(filter_t *me, float input);//更新滤波器的buffer
+float Filter_get_output(filter_t *me);//读取滤波后数值
 void Filter_deinit(filter_t *me);
 
 #ifdef __cplusplus

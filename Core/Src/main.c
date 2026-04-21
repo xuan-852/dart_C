@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "can.h"
 #include "tim.h"
+#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -216,6 +217,7 @@ int main(void)
   MX_CAN1_Init();
   MX_TIM4_Init();
   MX_TIM3_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   // 调整 CAN 接收优先级高于 TIM2 发送
 /*   HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 0, 0); 
