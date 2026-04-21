@@ -32,6 +32,7 @@
 #include "string.h"
 #include "usbd_cdc_if.h"
 #include "Filter.h"
+#include "referee.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -133,6 +134,10 @@ void SingingSome();//唱一小段
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+  referee_t g_referee;//裁判系统对象
+  ext_dart_info_t g_dart_info_cache;//缓存的飞镖信息
+  ext_dart_client_cmd_t g_dart_cmd_cache;//飞镖操作系统命令缓存
+
     int alarm_level = 0; // 0:None, 1:Temp, 2:Torque, 3:EXTI//用于报警
     short int alarm_motor = -1; // 报警电机编号
     uint16_t alarm_counter = 0; // 报警计数器
@@ -266,6 +271,16 @@ int main(void)
 
   HAL_Delay(3000);
   HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_SET);
+  
+  if (Referee_Init(&g_referee, NULL) != Referee_Ok)//初始化裁判机
+  {
+    Error_Handler();
+  }
+  if (Referee_StartUartReceive(&g_referee) != Referee_Ok)//启动UART1异步接收
+  {
+    Error_Handler();
+  }
+  
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -872,6 +887,11 @@ void MotorUpdate(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    (void)Referee_Update(&g_referee, HAL_GetTick());//周期维护在线状态
+
+    // 读取并缓存飞镖相关数据，供其他任务或调试输出使用
+    (void)Referee_GetDartInfo(&g_referee, &g_dart_info_cache);
+    (void)Referee_GetDartClientCmd(&g_referee, &g_dart_cmd_cache);
     
     // alarm_level 不在每次循环重置，保持报警状态直到系统复位或手动清除，
       //所以若电机因安全问题被禁用，请按复位键重置系统
@@ -1282,6 +1302,14 @@ void StartPidTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 /* USER CODE END 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1)
+  {
+    (void)Referee_OnUartRxCplt(&g_referee, HAL_GetTick());
+  }
+}
 
 /**
   * @brief  Period elapsed callback in non blocking mode

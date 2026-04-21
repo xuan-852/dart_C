@@ -22,10 +22,12 @@ virtualFolder:
               files:
                 - path: ../Core/Src/main.c
                 - path: ../Core/Src/Filter.c
+                - path: ../Core/Src/Referee.c
                 - path: ../Core/Src/gpio.c
                 - path: ../Core/Src/freertos.c
                 - path: ../Core/Src/can.c
                 - path: ../Core/Src/tim.c
+                - path: ../Core/Src/usart.c
                 - path: ../Core/Src/stm32f4xx_it.c
                 - path: ../Core/Src/stm32f4xx_hal_msp.c
                 - path: ../Core/Src/stm32f4xx_hal_timebase_tim.c
@@ -67,6 +69,7 @@ virtualFolder:
             - path: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
             - path: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c
             - path: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c
+            - path: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
           folders: []
         - name: CMSIS
           files:
