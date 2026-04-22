@@ -1,8 +1,8 @@
 dart_c\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/timers.c
-dart_c\timers.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+dart_c\timers.o: D:\keil\ARM\ARMCC\Bin\..\include\stdlib.h
 dart_c\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dart_c\timers.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-dart_c\timers.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dart_c\timers.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+dart_c\timers.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 dart_c\timers.o: ../Core/Inc/FreeRTOSConfig.h
 dart_c\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dart_c\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

@@ -171,6 +171,14 @@ Reset_Handler    PROC
         IMPORT  SystemInit
         IMPORT  __main
 
+                 ; Enable CP10/CP11 full access as early as possible.
+                 LDR     R0, =0xE000ED88
+                 LDR     R1, [R0]
+                 ORR     R1, R1, #0x00F00000
+                 STR     R1, [R0]
+                 DSB
+                 ISB
+
                  LDR     R0, =SystemInit
                  BLX     R0
                  LDR     R0, =__main

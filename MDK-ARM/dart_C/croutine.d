@@ -1,7 +1,7 @@
 dart_c\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
 dart_c\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dart_c\croutine.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-dart_c\croutine.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dart_c\croutine.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+dart_c\croutine.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 dart_c\croutine.o: ../Core/Inc/FreeRTOSConfig.h
 dart_c\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dart_c\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

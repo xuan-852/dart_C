@@ -17,6 +17,7 @@ Section Cross References
     startup_stm32f407xx.o(RESET) refers to port.o(.emb_text) for SVC_Handler
     startup_stm32f407xx.o(RESET) refers to stm32f4xx_it.o(i.DebugMon_Handler) for DebugMon_Handler
     startup_stm32f407xx.o(RESET) refers to port.o(i.SysTick_Handler) for SysTick_Handler
+    startup_stm32f407xx.o(RESET) refers to stm32f4xx_it.o(i.EXTI0_IRQHandler) for EXTI0_IRQHandler
     startup_stm32f407xx.o(RESET) refers to stm32f4xx_it.o(i.CAN1_RX0_IRQHandler) for CAN1_RX0_IRQHandler
     startup_stm32f407xx.o(RESET) refers to stm32f4xx_it.o(i.CAN1_RX1_IRQHandler) for CAN1_RX1_IRQHandler
     startup_stm32f407xx.o(RESET) refers to stm32f4xx_it.o(i.TIM1_UP_TIM10_IRQHandler) for TIM1_UP_TIM10_IRQHandler
@@ -29,82 +30,138 @@ Section Cross References
     startup_stm32f407xx.o(.text) refers to __main.o(!!!main) for __main
     startup_stm32f407xx.o(.text) refers to startup_stm32f407xx.o(HEAP) for Heap_Mem
     startup_stm32f407xx.o(.text) refers to startup_stm32f407xx.o(STACK) for Stack_Mem
+    main.o(i.CAN_SendMessage) refers to stm32f4xx_hal_can.o(i.HAL_CAN_AddTxMessage) for HAL_CAN_AddTxMessage
+    main.o(i.CAN_SendMessage) refers to main.o(.bss) for TxHeader
+    main.o(i.CAN_SendMessage) refers to can.o(.bss) for hcan2
+    main.o(i.CDC_Receive_Callback) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
+    main.o(i.CDC_Receive_Callback) refers to main.o(i.MotorSetOutput) for MotorSetOutput
+    main.o(i.CDC_Receive_Callback) refers to main.o(i.MotorRunSpeedTime) for MotorRunSpeedTime
+    main.o(i.CDC_Receive_Callback) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    main.o(i.CDC_Receive_Callback) refers to usbd_cdc_if.o(i.CDC_Transmit_FS) for CDC_Transmit_FS
+    main.o(i.CDC_Receive_Callback) refers to main.o(.data) for motor_array
+    main.o(i.CDC_Receive_Callback) refers to main.o(.bss) for dartParam_array
+    main.o(i.CanSendMotor) refers to main.o(i.CAN_SendMessage) for CAN_SendMessage
     main.o(i.HAL_CAN_RxFifo0MsgPendingCallback) refers to stm32f4xx_hal_can.o(i.HAL_CAN_GetRxMessage) for HAL_CAN_GetRxMessage
-    main.o(i.HAL_CAN_RxFifo0MsgPendingCallback) refers to main.o(i._Z15RecReceiveMotorP5MotorPh) for RecReceiveMotor(Motor*, unsigned char*)
+    main.o(i.HAL_CAN_RxFifo0MsgPendingCallback) refers to main.o(i.RecReceiveMotor) for RecReceiveMotor
     main.o(i.HAL_CAN_RxFifo0MsgPendingCallback) refers to main.o(.data) for motor_array
-    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to main.o(i._Z12CanSendMotorP9MotorSend) for CanSendMotor(MotorSend*)
+    main.o(i.HAL_GPIO_EXTI_Callback) refers to main.o(.data) for alarm_level
+    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to main.o(i.CanSendMotor) for CanSendMotor
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to stm32f4xx_hal.o(i.HAL_IncTick) for HAL_IncTick
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to main.o(.data) for CanSendCounter
-    main.o(i._Z10StartTask2PKv) refers to main.o(i._Z9MotorInitP5Motorjhhddj) for MotorInit(Motor*, unsigned, unsigned char, unsigned char, double, double, unsigned)
-    main.o(i._Z10StartTask2PKv) refers to main.o(i._Z7PidInitP3Piddddddd) for PidInit(Pid*, double, double, double, double, double, double)
-    main.o(i._Z10StartTask2PKv) refers to main.o(i._Z14MotorSetOutputP5Motor7PidModed) for MotorSetOutput(Motor*, PidMode, double)
-    main.o(i._Z10StartTask2PKv) refers to cmsis_os.o(i.osDelay) for osDelay
-    main.o(i._Z10StartTask2PKv) refers to main.o(.data) for GM6020
-    main.o(i._Z11MotorUpdatePKv) refers to stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Start) for HAL_TIM_PWM_Start
-    main.o(i._Z11MotorUpdatePKv) refers to dfix.o(x$fpl$dfix) for __aeabi_d2iz
-    main.o(i._Z11MotorUpdatePKv) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
-    main.o(i._Z11MotorUpdatePKv) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
-    main.o(i._Z11MotorUpdatePKv) refers to fabs.o(i.__hardfp_fabs) for __hardfp_fabs
-    main.o(i._Z11MotorUpdatePKv) refers to main.o(i._Z19TransferToMotorSendP5Motor) for TransferToMotorSend(Motor*)
-    main.o(i._Z11MotorUpdatePKv) refers to cmsis_os.o(i.osDelay) for osDelay
-    main.o(i._Z11MotorUpdatePKv) refers to tim.o(.bss) for htim4
-    main.o(i._Z11MotorUpdatePKv) refers to main.o(.data) for motor_array
-    main.o(i._Z12CanSendMotorP9MotorSend) refers to main.o(i._Z15CAN_SendMessagePhj) for CAN_SendMessage(unsigned char*, unsigned)
-    main.o(i._Z12PidCalculateP3Pid) refers to daddsub_clz.o(x$fpl$dsub) for __aeabi_dsub
-    main.o(i._Z12PidCalculateP3Pid) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
-    main.o(i._Z12PidCalculateP3Pid) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
-    main.o(i._Z12PidCalculateP3Pid) refers to basic.o(x$fpl$basic) for __aeabi_dneg
-    main.o(i._Z12PidCalculateP3Pid) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
-    main.o(i._Z12StartPidTaskPKv) refers to main.o(i._Z12PidCalculateP3Pid) for PidCalculate(Pid*)
-    main.o(i._Z12StartPidTaskPKv) refers to cmsis_os.o(i.osDelay) for osDelay
-    main.o(i._Z12StartPidTaskPKv) refers to main.o(.data) for motor_array
-    main.o(i._Z15CAN_SendMessagePhj) refers to stm32f4xx_hal_can.o(i.HAL_CAN_AddTxMessage) for HAL_CAN_AddTxMessage
-    main.o(i._Z15CAN_SendMessagePhj) refers to main.o(.bss) for TxHeader
-    main.o(i._Z15CAN_SendMessagePhj) refers to can.o(.bss) for hcan2
-    main.o(i._Z15RecReceiveMotorP5MotorPh) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
-    main.o(i._Z15RecReceiveMotorP5MotorPh) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
-    main.o(i._Z18SystemClock_Configv) refers to rt_memclr_w.o(.text) for __aeabi_memclr4
-    main.o(i._Z18SystemClock_Configv) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_OscConfig) for HAL_RCC_OscConfig
-    main.o(i._Z18SystemClock_Configv) refers to main.o(i.Error_Handler) for Error_Handler
-    main.o(i._Z18SystemClock_Configv) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_ClockConfig) for HAL_RCC_ClockConfig
-    main.o(i._Z19TransferToMotorSendP5Motor) refers to dfix.o(x$fpl$dfix) for __aeabi_d2iz
-    main.o(i._Z19TransferToMotorSendP5Motor) refers to main.o(.data) for _1FE
+    main.o(i.HAL_UART_RxCpltCallback) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    main.o(i.HAL_UART_RxCpltCallback) refers to main.o(.bss) for g_referee
+    main.o(i.MotorCdcFeedback) refers to dfix.o(x$fpl$dfix) for __aeabi_d2iz
+    main.o(i.MotorCdcFeedback) refers to usbd_cdc_if.o(i.CDC_Transmit_FS) for CDC_Transmit_FS
+    main.o(i.MotorCdcFeedback) refers to main.o(.data) for motor_array
+    main.o(i.MotorRunSpeedTime) refers to main.o(i.MotorSetOutput) for MotorSetOutput
+    main.o(i.MotorRunSpeedTimeBlocking) refers to main.o(i.MotorRunSpeedTime) for MotorRunSpeedTime
+    main.o(i.MotorRunSpeedTimeBlocking) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.MotorRunToAngleBlocking) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    main.o(i.MotorRunToAngleBlocking) refers to fabs.o(i.__hardfp_fabs) for __hardfp_fabs
+    main.o(i.MotorRunToAngleBlocking) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.MotorRunToAngleBlocking) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    main.o(i.MotorRunToAngleBlocking) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
+    main.o(i.MotorRunToAngleBlocking) refers to main.o(i.MotorSetOutput) for MotorSetOutput
+    main.o(i.MotorRunToStall) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.MotorUpdate) refers to stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Start) for HAL_TIM_PWM_Start
+    main.o(i.MotorUpdate) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    main.o(i.MotorUpdate) refers to main.o(i.MotorSetOutput) for MotorSetOutput
+    main.o(i.MotorUpdate) refers to daddsub_clz.o(x$fpl$dsub) for __aeabi_dsub
+    main.o(i.MotorUpdate) refers to fabs.o(i.__hardfp_fabs) for __hardfp_fabs
+    main.o(i.MotorUpdate) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    main.o(i.MotorUpdate) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    main.o(i.MotorUpdate) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
+    main.o(i.MotorUpdate) refers to rt_memcpy_w.o(.text) for __aeabi_memcpy4
+    main.o(i.MotorUpdate) refers to f2d.o(x$fpl$f2d) for __aeabi_f2d
+    main.o(i.MotorUpdate) refers to pow.o(i.__hardfp_pow) for __hardfp_pow
+    main.o(i.MotorUpdate) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    main.o(i.MotorUpdate) refers to d2f.o(x$fpl$d2f) for __aeabi_d2f
+    main.o(i.MotorUpdate) refers to main.o(i.TransferToMotorSend) for TransferToMotorSend
+    main.o(i.MotorUpdate) refers to main.o(.data) for alarm_level
+    main.o(i.MotorUpdate) refers to tim.o(.bss) for htim4
+    main.o(i.MotorUpdate) refers to main.o(.bss) for g_referee
+    main.o(i.MotorUpdate) refers to main.o(.constdata) for .constdata
+    main.o(i.MotorUpdate) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.PidCalculate) refers to daddsub_clz.o(x$fpl$dsub) for __aeabi_dsub
+    main.o(i.PidCalculate) refers to fabs.o(i.__hardfp_fabs) for __hardfp_fabs
+    main.o(i.PidCalculate) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
+    main.o(i.PidCalculate) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    main.o(i.PidCalculate) refers to deqf.o(x$fpl$deqf) for __aeabi_cdcmpeq
+    main.o(i.PidCalculate) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    main.o(i.PidCalculate) refers to ddiv.o(x$fpl$ddiv) for __aeabi_ddiv
+    main.o(i.PidCalculate) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    main.o(i.PidCalculate) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    main.o(i.RecReceiveMotor) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
+    main.o(i.RecReceiveMotor) refers to f2d.o(x$fpl$f2d) for __aeabi_f2d
+    main.o(i.RecReceiveMotor) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    main.o(i.Singing) refers to f2d.o(x$fpl$f2d) for __aeabi_f2d
+    main.o(i.Singing) refers to pow.o(i.__hardfp_pow) for __hardfp_pow
+    main.o(i.Singing) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    main.o(i.Singing) refers to d2f.o(x$fpl$d2f) for __aeabi_d2f
+    main.o(i.Singing) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.Singing) refers to main.o(.data) for MotorUpdateFlag
+    main.o(i.Singing) refers to main.o(.constdata) for Music_Score
+    main.o(i.Singing) refers to tim.o(.bss) for htim4
+    main.o(i.SingingSome) refers to f2d.o(x$fpl$f2d) for __aeabi_f2d
+    main.o(i.SingingSome) refers to pow.o(i.__hardfp_pow) for __hardfp_pow
+    main.o(i.SingingSome) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    main.o(i.SingingSome) refers to d2f.o(x$fpl$d2f) for __aeabi_d2f
+    main.o(i.SingingSome) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.SingingSome) refers to main.o(.data) for MotorUpdateFlag
+    main.o(i.SingingSome) refers to main.o(.constdata) for Music_Score_Some
+    main.o(i.SingingSome) refers to tim.o(.bss) for htim4
+    main.o(i.StartCdcTask) refers to main.o(i.MotorCdcFeedback) for MotorCdcFeedback
+    main.o(i.StartCdcTask) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.StartPidTask) refers to main.o(i.PidCalculate) for PidCalculate
+    main.o(i.StartPidTask) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.StartPidTask) refers to main.o(.data) for motor_array
+    main.o(i.StartTask2) refers to main.o(i.MotorInit) for MotorInit
+    main.o(i.StartTask2) refers to main.o(i.MotorSafetyInit) for MotorSafetyInit
+    main.o(i.StartTask2) refers to main.o(i.PidInit) for PidInit
+    main.o(i.StartTask2) refers to main.o(i.MotorSetOutput) for MotorSetOutput
+    main.o(i.StartTask2) refers to main.o(i.dartParamInit) for dartParamInit
+    main.o(i.StartTask2) refers to main.o(i.MotorRunToStall) for MotorRunToStall
+    main.o(i.StartTask2) refers to main.o(i.MotorRunToAngleBlocking) for MotorRunToAngleBlocking
+    main.o(i.StartTask2) refers to cmsis_os.o(i.osDelay) for osDelay
+    main.o(i.StartTask2) refers to main.o(i.MotorRunSpeedTimeBlocking) for MotorRunSpeedTimeBlocking
+    main.o(i.StartTask2) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    main.o(i.StartTask2) refers to main.o(.data) for fric1
+    main.o(i.StartTask2) refers to main.o(i.Singing) for Singing
+    main.o(i.StartTask2) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    main.o(i.StartTask2) refers to main.o(.bss) for dartParam_array
+    main.o(i.SystemClock_Config) refers to rt_memclr_w.o(.text) for __aeabi_memclr4
+    main.o(i.SystemClock_Config) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_OscConfig) for HAL_RCC_OscConfig
+    main.o(i.SystemClock_Config) refers to main.o(i.Error_Handler) for Error_Handler
+    main.o(i.SystemClock_Config) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_ClockConfig) for HAL_RCC_ClockConfig
+    main.o(i.TransferToMotorSend) refers to dfix.o(x$fpl$dfix) for __aeabi_d2iz
+    main.o(i.TransferToMotorSend) refers to main.o(.data) for _1FE
+    main.o(i.dartParamInit) refers to main.o(.bss) for dartParam_array
     main.o(i.main) refers to stm32f4xx_hal.o(i.HAL_Init) for HAL_Init
-    main.o(i.main) refers to main.o(i._Z18SystemClock_Configv) for SystemClock_Config()
+    main.o(i.main) refers to main.o(i.SystemClock_Config) for SystemClock_Config
     main.o(i.main) refers to gpio.o(i.MX_GPIO_Init) for MX_GPIO_Init
     main.o(i.main) refers to can.o(i.MX_CAN2_Init) for MX_CAN2_Init
     main.o(i.main) refers to tim.o(i.MX_TIM2_Init) for MX_TIM2_Init
     main.o(i.main) refers to can.o(i.MX_CAN1_Init) for MX_CAN1_Init
     main.o(i.main) refers to tim.o(i.MX_TIM4_Init) for MX_TIM4_Init
     main.o(i.main) refers to tim.o(i.MX_TIM3_Init) for MX_TIM3_Init
+    main.o(i.main) refers to usart.o(i.MX_USART1_UART_Init) for MX_USART1_UART_Init
     main.o(i.main) refers to stm32f4xx_hal_can.o(i.HAL_CAN_Start) for HAL_CAN_Start
     main.o(i.main) refers to main.o(i.Error_Handler) for Error_Handler
     main.o(i.main) refers to stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Start_IT) for HAL_TIM_Base_Start_IT
     main.o(i.main) refers to stm32f4xx_hal_can.o(i.HAL_CAN_ConfigFilter) for HAL_CAN_ConfigFilter
     main.o(i.main) refers to stm32f4xx_hal_can.o(i.HAL_CAN_ActivateNotification) for HAL_CAN_ActivateNotification
+    main.o(i.main) refers to stm32f4xx_hal.o(i.HAL_Delay) for HAL_Delay
+    main.o(i.main) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
+    main.o(i.main) refers to freertos.o(i.MX_FREERTOS_Init) for MX_FREERTOS_Init
     main.o(i.main) refers to cmsis_os.o(i.osKernelStart) for osKernelStart
     main.o(i.main) refers to can.o(.bss) for hcan2
     main.o(i.main) refers to tim.o(.bss) for htim2
-    main.o(i.main) refers to main.o(.data) for high
-    main.o(.ARM.exidx) refers to main.o(i._Z7PidInitP3Piddddddd) for i._Z7PidInitP3Piddddddd
-    main.o(.ARM.exidx) refers to main.o(i._Z9MotorInitP5Motorjhhddj) for i._Z9MotorInitP5Motorjhhddj
-    main.o(.ARM.exidx) refers to main.o(i._Z19TransferToMotorSendP5Motor) for i._Z19TransferToMotorSendP5Motor
-    main.o(.ARM.exidx) refers to main.o(i._Z15CAN_SendMessagePhj) for i._Z15CAN_SendMessagePhj
-    main.o(.ARM.exidx) refers to main.o(i._Z12CanSendMotorP9MotorSend) for i._Z12CanSendMotorP9MotorSend
-    main.o(.ARM.exidx) refers to main.o(i._Z15RecReceiveMotorP5MotorPh) for i._Z15RecReceiveMotorP5MotorPh
-    main.o(.ARM.exidx) refers to main.o(i.Error_Handler) for i.Error_Handler
-    main.o(.ARM.exidx) refers to main.o(i._Z18SystemClock_Configv) for i._Z18SystemClock_Configv
-    main.o(.ARM.exidx) refers to main.o(i.main) for i.main
-    main.o(.ARM.exidx) refers to main.o(i.HAL_CAN_RxFifo0MsgPendingCallback) for i.HAL_CAN_RxFifo0MsgPendingCallback
-    main.o(.ARM.exidx) refers to main.o(i._Z12PidCalculateP3Pid) for i._Z12PidCalculateP3Pid
-    main.o(.ARM.exidx) refers to main.o(i._Z14MotorSetOutputP5Motor7PidModed) for i._Z14MotorSetOutputP5Motor7PidModed
-    main.o(.ARM.exidx) refers to main.o(i._Z11MotorUpdatePKv) for i._Z11MotorUpdatePKv
-    main.o(.ARM.exidx) refers to main.o(i._Z10StartTask2PKv) for i._Z10StartTask2PKv
-    main.o(.ARM.exidx) refers to main.o(i._Z12StartPidTaskPKv) for i._Z12StartPidTaskPKv
-    main.o(.ARM.exidx) refers to main.o(i.HAL_TIM_PeriodElapsedCallback) for i.HAL_TIM_PeriodElapsedCallback
+    main.o(i.main) refers to main.o(.bss) for g_referee
     gpio.o(i.MX_GPIO_Init) refers to rt_memclr_w.o(.text) for __aeabi_memclr4
     gpio.o(i.MX_GPIO_Init) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
     gpio.o(i.MX_GPIO_Init) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_Init) for HAL_GPIO_Init
+    gpio.o(i.MX_GPIO_Init) refers to stm32f4xx_hal_cortex.o(i.HAL_NVIC_SetPriority) for HAL_NVIC_SetPriority
+    gpio.o(i.MX_GPIO_Init) refers to stm32f4xx_hal_cortex.o(i.HAL_NVIC_EnableIRQ) for HAL_NVIC_EnableIRQ
     freertos.o(i.MX_FREERTOS_Init) refers to rt_memcpy_w.o(.text) for __aeabi_memcpy4
     freertos.o(i.MX_FREERTOS_Init) refers to cmsis_os.o(i.osThreadCreate) for osThreadCreate
     freertos.o(i.MX_FREERTOS_Init) refers to freertos.o(.constdata) for .constdata
@@ -114,6 +171,10 @@ Section Cross References
     freertos.o(i.vApplicationGetIdleTaskMemory) refers to freertos.o(.bss) for xIdleTaskTCBBuffer
     freertos.o(.constdata) refers to freertos.o(.conststring) for .conststring
     freertos.o(.constdata) refers to freertos.o(i.StartDefaultTask) for StartDefaultTask
+    freertos.o(.constdata) refers to main.o(i.MotorUpdate) for MotorUpdate
+    freertos.o(.constdata) refers to main.o(i.StartTask2) for StartTask2
+    freertos.o(.constdata) refers to main.o(i.StartPidTask) for StartPidTask
+    freertos.o(.constdata) refers to main.o(i.StartCdcTask) for StartCdcTask
     can.o(i.HAL_CAN_MspDeInit) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_DeInit) for HAL_GPIO_DeInit
     can.o(i.HAL_CAN_MspDeInit) refers to stm32f4xx_hal_cortex.o(i.HAL_NVIC_DisableIRQ) for HAL_NVIC_DisableIRQ
     can.o(i.HAL_CAN_MspDeInit) refers to can.o(.data) for HAL_RCC_CAN1_CLK_ENABLED
@@ -151,6 +212,12 @@ Section Cross References
     tim.o(i.MX_TIM4_Init) refers to stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_ConfigChannel) for HAL_TIM_PWM_ConfigChannel
     tim.o(i.MX_TIM4_Init) refers to tim.o(i.HAL_TIM_MspPostInit) for HAL_TIM_MspPostInit
     tim.o(i.MX_TIM4_Init) refers to tim.o(.bss) for htim4
+    usart.o(i.HAL_UART_MspDeInit) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_DeInit) for HAL_GPIO_DeInit
+    usart.o(i.HAL_UART_MspInit) refers to rt_memclr_w.o(.text) for __aeabi_memclr4
+    usart.o(i.HAL_UART_MspInit) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_Init) for HAL_GPIO_Init
+    usart.o(i.MX_USART1_UART_Init) refers to stm32f4xx_hal_uart.o(i.HAL_UART_Init) for HAL_UART_Init
+    usart.o(i.MX_USART1_UART_Init) refers to main.o(i.Error_Handler) for Error_Handler
+    usart.o(i.MX_USART1_UART_Init) refers to usart.o(.bss) for huart1
     stm32f4xx_it.o(i.CAN1_RX0_IRQHandler) refers to stm32f4xx_hal_can.o(i.HAL_CAN_IRQHandler) for HAL_CAN_IRQHandler
     stm32f4xx_it.o(i.CAN1_RX0_IRQHandler) refers to can.o(.bss) for hcan1
     stm32f4xx_it.o(i.CAN1_RX1_IRQHandler) refers to stm32f4xx_hal_can.o(i.HAL_CAN_IRQHandler) for HAL_CAN_IRQHandler
@@ -159,6 +226,7 @@ Section Cross References
     stm32f4xx_it.o(i.CAN2_RX0_IRQHandler) refers to can.o(.bss) for hcan2
     stm32f4xx_it.o(i.CAN2_RX1_IRQHandler) refers to stm32f4xx_hal_can.o(i.HAL_CAN_IRQHandler) for HAL_CAN_IRQHandler
     stm32f4xx_it.o(i.CAN2_RX1_IRQHandler) refers to can.o(.bss) for hcan2
+    stm32f4xx_it.o(i.EXTI0_IRQHandler) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_IRQHandler) for HAL_GPIO_EXTI_IRQHandler
     stm32f4xx_it.o(i.OTG_FS_IRQHandler) refers to stm32f4xx_hal_pcd.o(i.HAL_PCD_IRQHandler) for HAL_PCD_IRQHandler
     stm32f4xx_it.o(i.OTG_FS_IRQHandler) refers to usbd_conf.o(.bss) for hpcd_USB_OTG_FS
     stm32f4xx_it.o(i.TIM1_UP_TIM10_IRQHandler) refers to stm32f4xx_hal_tim.o(i.HAL_TIM_IRQHandler) for HAL_TIM_IRQHandler
@@ -512,7 +580,7 @@ Section Cross References
     stm32f4xx_hal_flash_ex.o(i.HAL_FLASHEx_OBProgram) refers to stm32f4xx_hal_flash_ex.o(i.FLASH_OB_UserConfig) for FLASH_OB_UserConfig
     stm32f4xx_hal_flash_ex.o(i.HAL_FLASHEx_OBProgram) refers to stm32f4xx_hal_flash_ex.o(i.FLASH_OB_BOR_LevelConfig) for FLASH_OB_BOR_LevelConfig
     stm32f4xx_hal_flash_ex.o(i.HAL_FLASHEx_OBProgram) refers to stm32f4xx_hal_flash.o(.data) for pFlash
-    stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_IRQHandler) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_Callback) for HAL_GPIO_EXTI_Callback
+    stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_IRQHandler) refers to main.o(i.HAL_GPIO_EXTI_Callback) for HAL_GPIO_EXTI_Callback
     stm32f4xx_hal_dma_ex.o(i.HAL_DMAEx_MultiBufferStart) refers to stm32f4xx_hal_dma_ex.o(i.DMA_MultiBufferSetConfig) for DMA_MultiBufferSetConfig
     stm32f4xx_hal_dma_ex.o(i.HAL_DMAEx_MultiBufferStart_IT) refers to stm32f4xx_hal_dma_ex.o(i.DMA_MultiBufferSetConfig) for DMA_MultiBufferSetConfig
     stm32f4xx_hal_dma.o(i.DMA_CalcBaseAndBitshift) refers to stm32f4xx_hal_dma.o(.constdata) for flagBitshiftOffset
@@ -570,6 +638,82 @@ Section Cross References
     stm32f4xx_hal_can.o(i.HAL_CAN_Init) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
     stm32f4xx_hal_can.o(i.HAL_CAN_Start) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
     stm32f4xx_hal_can.o(i.HAL_CAN_Stop) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_uart.o(i.HAL_HalfDuplex_Init) refers to usart.o(i.HAL_UART_MspInit) for HAL_UART_MspInit
+    stm32f4xx_hal_uart.o(i.HAL_HalfDuplex_Init) refers to stm32f4xx_hal_uart.o(i.UART_SetConfig) for UART_SetConfig
+    stm32f4xx_hal_uart.o(i.HAL_LIN_Init) refers to usart.o(i.HAL_UART_MspInit) for HAL_UART_MspInit
+    stm32f4xx_hal_uart.o(i.HAL_LIN_Init) refers to stm32f4xx_hal_uart.o(i.UART_SetConfig) for UART_SetConfig
+    stm32f4xx_hal_uart.o(i.HAL_MultiProcessor_Init) refers to usart.o(i.HAL_UART_MspInit) for HAL_UART_MspInit
+    stm32f4xx_hal_uart.o(i.HAL_MultiProcessor_Init) refers to stm32f4xx_hal_uart.o(i.UART_SetConfig) for UART_SetConfig
+    stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle_DMA) refers to stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) for UART_Start_Receive_DMA
+    stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle_IT) refers to stm32f4xx_hal_uart.o(i.UART_Start_Receive_IT) for UART_Start_Receive_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_GetError) for HAL_DMA_GetError
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_GetError) for HAL_DMA_GetError
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive_IT) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort_IT) for HAL_DMA_Abort_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive_IT) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceiveCpltCallback) for HAL_UART_AbortReceiveCpltCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive_IT) refers to stm32f4xx_hal_uart.o(i.UART_DMARxOnlyAbortCallback) for UART_DMARxOnlyAbortCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_GetError) for HAL_DMA_GetError
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit_IT) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort_IT) for HAL_DMA_Abort_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit_IT) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmitCpltCallback) for HAL_UART_AbortTransmitCpltCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit_IT) refers to stm32f4xx_hal_uart.o(i.UART_DMATxOnlyAbortCallback) for UART_DMATxOnlyAbortCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort_IT) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort_IT) for HAL_DMA_Abort_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort_IT) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortCpltCallback) for HAL_UART_AbortCpltCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort_IT) refers to stm32f4xx_hal_uart.o(i.UART_DMATxAbortCallback) for UART_DMATxAbortCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_Abort_IT) refers to stm32f4xx_hal_uart.o(i.UART_DMARxAbortCallback) for UART_DMARxAbortCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_DMAStop) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_uart.o(i.HAL_UART_DMAStop) refers to stm32f4xx_hal_uart.o(i.UART_EndTxTransfer) for UART_EndTxTransfer
+    stm32f4xx_hal_uart.o(i.HAL_UART_DMAStop) refers to stm32f4xx_hal_uart.o(i.UART_EndRxTransfer) for UART_EndRxTransfer
+    stm32f4xx_hal_uart.o(i.HAL_UART_DeInit) refers to usart.o(i.HAL_UART_MspDeInit) for HAL_UART_MspDeInit
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.UART_Receive_IT) for UART_Receive_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.UART_EndRxTransfer) for UART_EndRxTransfer
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort_IT) for HAL_DMA_Abort_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.HAL_UART_ErrorCallback) for HAL_UART_ErrorCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.HAL_UARTEx_RxEventCallback) for HAL_UARTEx_RxEventCallback
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.UART_Transmit_IT) for UART_Transmit_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.UART_EndTransmit_IT) for UART_EndTransmit_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler) refers to stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError) for UART_DMAAbortOnError
+    stm32f4xx_hal_uart.o(i.HAL_UART_Init) refers to usart.o(i.HAL_UART_MspInit) for HAL_UART_MspInit
+    stm32f4xx_hal_uart.o(i.HAL_UART_Init) refers to stm32f4xx_hal_uart.o(i.UART_SetConfig) for UART_SetConfig
+    stm32f4xx_hal_uart.o(i.HAL_UART_Receive) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_uart.o(i.HAL_UART_Receive) refers to stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout) for UART_WaitOnFlagUntilTimeout
+    stm32f4xx_hal_uart.o(i.HAL_UART_Receive_DMA) refers to stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) for UART_Start_Receive_DMA
+    stm32f4xx_hal_uart.o(i.HAL_UART_Receive_IT) refers to stm32f4xx_hal_uart.o(i.UART_Start_Receive_IT) for UART_Start_Receive_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit) refers to stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout) for UART_WaitOnFlagUntilTimeout
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Start_IT) for HAL_DMA_Start_IT
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMATransmitCplt) for UART_DMATransmitCplt
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMATxHalfCplt) for UART_DMATxHalfCplt
+    stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMAError) for UART_DMAError
+    stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError) refers to stm32f4xx_hal_uart.o(i.HAL_UART_ErrorCallback) for HAL_UART_ErrorCallback
+    stm32f4xx_hal_uart.o(i.UART_DMAError) refers to stm32f4xx_hal_uart.o(i.UART_EndTxTransfer) for UART_EndTxTransfer
+    stm32f4xx_hal_uart.o(i.UART_DMAError) refers to stm32f4xx_hal_uart.o(i.UART_EndRxTransfer) for UART_EndRxTransfer
+    stm32f4xx_hal_uart.o(i.UART_DMAError) refers to stm32f4xx_hal_uart.o(i.HAL_UART_ErrorCallback) for HAL_UART_ErrorCallback
+    stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt) refers to stm32f4xx_hal_uart.o(i.HAL_UARTEx_RxEventCallback) for HAL_UARTEx_RxEventCallback
+    stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt) refers to main.o(i.HAL_UART_RxCpltCallback) for HAL_UART_RxCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMARxAbortCallback) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortCpltCallback) for HAL_UART_AbortCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt) refers to stm32f4xx_hal_uart.o(i.HAL_UARTEx_RxEventCallback) for HAL_UARTEx_RxEventCallback
+    stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt) refers to stm32f4xx_hal_uart.o(i.HAL_UART_RxHalfCpltCallback) for HAL_UART_RxHalfCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMARxOnlyAbortCallback) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceiveCpltCallback) for HAL_UART_AbortReceiveCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMATransmitCplt) refers to stm32f4xx_hal_uart.o(i.HAL_UART_TxCpltCallback) for HAL_UART_TxCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMATxAbortCallback) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortCpltCallback) for HAL_UART_AbortCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMATxHalfCplt) refers to stm32f4xx_hal_uart.o(i.HAL_UART_TxHalfCpltCallback) for HAL_UART_TxHalfCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_DMATxOnlyAbortCallback) refers to stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmitCpltCallback) for HAL_UART_AbortTransmitCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_EndTransmit_IT) refers to stm32f4xx_hal_uart.o(i.HAL_UART_TxCpltCallback) for HAL_UART_TxCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_Receive_IT) refers to stm32f4xx_hal_uart.o(i.HAL_UARTEx_RxEventCallback) for HAL_UARTEx_RxEventCallback
+    stm32f4xx_hal_uart.o(i.UART_Receive_IT) refers to main.o(i.HAL_UART_RxCpltCallback) for HAL_UART_RxCpltCallback
+    stm32f4xx_hal_uart.o(i.UART_SetConfig) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_GetPCLK2Freq) for HAL_RCC_GetPCLK2Freq
+    stm32f4xx_hal_uart.o(i.UART_SetConfig) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_GetPCLK1Freq) for HAL_RCC_GetPCLK1Freq
+    stm32f4xx_hal_uart.o(i.UART_SetConfig) refers to lludivv7m.o(.text) for __aeabi_uldivmod
+    stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Start_IT) for HAL_DMA_Start_IT
+    stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt) for UART_DMAReceiveCplt
+    stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt) for UART_DMARxHalfCplt
+    stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA) refers to stm32f4xx_hal_uart.o(i.UART_DMAError) for UART_DMAError
+    stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout) refers to stm32f4xx_hal_uart.o(i.UART_EndRxTransfer) for UART_EndRxTransfer
     system_stm32f4xx.o(i.SystemCoreClockUpdate) refers to system_stm32f4xx.o(.data) for SystemCoreClock
     system_stm32f4xx.o(i.SystemCoreClockUpdate) refers to system_stm32f4xx.o(.constdata) for AHBPrescTable
     event_groups.o(i.vEventGroupClearBitsCallback) refers to event_groups.o(i.xEventGroupClearBits) for xEventGroupClearBits
@@ -1076,6 +1220,7 @@ Section Cross References
     usbd_cdc_if.o(i.CDC_Init_FS) refers to usbd_cdc.o(i.USBD_CDC_SetRxBuffer) for USBD_CDC_SetRxBuffer
     usbd_cdc_if.o(i.CDC_Init_FS) refers to usbd_cdc_if.o(.bss) for UserTxBufferFS
     usbd_cdc_if.o(i.CDC_Init_FS) refers to usb_device.o(.bss) for hUsbDeviceFS
+    usbd_cdc_if.o(i.CDC_Receive_FS) refers to main.o(i.CDC_Receive_Callback) for CDC_Receive_Callback
     usbd_cdc_if.o(i.CDC_Receive_FS) refers to usbd_cdc.o(i.USBD_CDC_SetRxBuffer) for USBD_CDC_SetRxBuffer
     usbd_cdc_if.o(i.CDC_Receive_FS) refers to usbd_cdc.o(i.USBD_CDC_ReceivePacket) for USBD_CDC_ReceivePacket
     usbd_cdc_if.o(i.CDC_Receive_FS) refers to usb_device.o(.bss) for hUsbDeviceFS
@@ -1243,6 +1388,9 @@ Section Cross References
     memset.o(.text) refers to rt_memclr.o(.text) for _memset
     __main.o(!!!main) refers to __rtentry.o(.ARM.Collect$$rtentry$$00000000) for __rt_entry
     basic.o(x$fpl$basic) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    d2f.o(x$fpl$d2f) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    d2f.o(x$fpl$d2f) refers to fretinf.o(x$fpl$fretinf) for __fpl_fretinf
+    d2f.o(x$fpl$d2f) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
     daddsub_clz.o(x$fpl$dadd) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     daddsub_clz.o(x$fpl$dadd) refers to daddsub_clz.o(x$fpl$dsub) for _dsub1
     daddsub_clz.o(x$fpl$dadd) refers to dretinf.o(x$fpl$dretinf) for __fpl_dretinf
@@ -1253,6 +1401,14 @@ Section Cross References
     daddsub_clz.o(x$fpl$dsub) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     daddsub_clz.o(x$fpl$dsub) refers to daddsub_clz.o(x$fpl$dadd) for _dadd1
     daddsub_clz.o(x$fpl$dsub) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
+    ddiv.o(x$fpl$drdiv) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    ddiv.o(x$fpl$drdiv) refers to ddiv.o(x$fpl$ddiv) for ddiv_entry
+    ddiv.o(x$fpl$ddiv) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    ddiv.o(x$fpl$ddiv) refers to dretinf.o(x$fpl$dretinf) for __fpl_dretinf
+    ddiv.o(x$fpl$ddiv) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
+    deqf.o(x$fpl$deqf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    deqf.o(x$fpl$deqf) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
+    deqf.o(x$fpl$deqf) refers to dcmpi.o(x$fpl$dcmpinf) for __fpl_dcmp_Inf
     dfix.o(x$fpl$dfix) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dfix.o(x$fpl$dfix) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
     dfix.o(x$fpl$dfixr) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
@@ -1260,14 +1416,69 @@ Section Cross References
     dflt_clz.o(x$fpl$dfltu) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dflt_clz.o(x$fpl$dflt) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dflt_clz.o(x$fpl$dfltn) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    dleqf.o(x$fpl$dleqf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    dleqf.o(x$fpl$dleqf) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
+    dleqf.o(x$fpl$dleqf) refers to dcmpi.o(x$fpl$dcmpinf) for __fpl_dcmp_Inf
     dmul.o(x$fpl$dmul) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dmul.o(x$fpl$dmul) refers to dretinf.o(x$fpl$dretinf) for __fpl_dretinf
     dmul.o(x$fpl$dmul) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
     drleqf.o(x$fpl$drleqf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     drleqf.o(x$fpl$drleqf) refers to dleqf.o(x$fpl$dleqf) for __fpl_dcmple_InfNaN
+    f2d.o(x$fpl$f2d) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    f2d.o(x$fpl$f2d) refers to fnaninf.o(x$fpl$fnaninf) for __fpl_fnaninf
+    f2d.o(x$fpl$f2d) refers to dretinf.o(x$fpl$dretinf) for __fpl_dretinf
     fabs.o(i.__hardfp_fabs) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     fabs.o(i.__softfp_fabs) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     fabs.o(i.fabs) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow.o(i.__hardfp_pow) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow.o(i.__hardfp_pow) refers to dunder.o(i.__mathlib_dbl_infnan2) for __mathlib_dbl_infnan2
+    pow.o(i.__hardfp_pow) refers to _rserrno.o(.text) for __set_errno
+    pow.o(i.__hardfp_pow) refers to dunder.o(i.__mathlib_dbl_divzero) for __mathlib_dbl_divzero
+    pow.o(i.__hardfp_pow) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    pow.o(i.__hardfp_pow) refers to dunder.o(i.__mathlib_dbl_overflow) for __mathlib_dbl_overflow
+    pow.o(i.__hardfp_pow) refers to ddiv.o(x$fpl$ddiv) for __aeabi_ddiv
+    pow.o(i.__hardfp_pow) refers to sqrt.o(i.sqrt) for sqrt
+    pow.o(i.__hardfp_pow) refers to fabs.o(i.fabs) for fabs
+    pow.o(i.__hardfp_pow) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
+    pow.o(i.__hardfp_pow) refers to dunder.o(i.__mathlib_dbl_invalid) for __mathlib_dbl_invalid
+    pow.o(i.__hardfp_pow) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    pow.o(i.__hardfp_pow) refers to dunder.o(i.__mathlib_dbl_underflow) for __mathlib_dbl_underflow
+    pow.o(i.__hardfp_pow) refers to daddsub_clz.o(x$fpl$dsub) for __aeabi_dsub
+    pow.o(i.__hardfp_pow) refers to daddsub_clz.o(x$fpl$drsb) for __aeabi_drsub
+    pow.o(i.__hardfp_pow) refers to qnan.o(.constdata) for __mathlib_zero
+    pow.o(i.__hardfp_pow) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    pow.o(i.__hardfp_pow) refers to poly.o(i.__kernel_poly) for __kernel_poly
+    pow.o(i.__hardfp_pow) refers to pow.o(.constdata) for .constdata
+    pow.o(i.__hardfp_pow) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
+    pow.o(i.__hardfp_pow) refers to scalbn.o(x$fpl$scalbn) for __ARM_scalbn
+    pow.o(i.__hardfp_pow) refers to fpclassify.o(i.__ARM_fpclassify) for __ARM_fpclassify
+    pow.o(i.__softfp_pow) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow.o(i.__softfp_pow) refers to pow.o(i.__hardfp_pow) for __hardfp_pow
+    pow.o(i.pow) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow.o(i.pow) refers to pow.o(i.__hardfp_pow) for __hardfp_pow
+    pow.o(.constdata) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow_x.o(i.____hardfp_pow$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow_x.o(i.____hardfp_pow$lsc) refers to dunder.o(i.__mathlib_dbl_infnan2) for __mathlib_dbl_infnan2
+    pow_x.o(i.____hardfp_pow$lsc) refers to _rserrno.o(.text) for __set_errno
+    pow_x.o(i.____hardfp_pow$lsc) refers to basic.o(x$fpl$basic) for __aeabi_dneg
+    pow_x.o(i.____hardfp_pow$lsc) refers to ddiv.o(x$fpl$ddiv) for __aeabi_ddiv
+    pow_x.o(i.____hardfp_pow$lsc) refers to sqrt.o(i.sqrt) for sqrt
+    pow_x.o(i.____hardfp_pow$lsc) refers to fabs.o(i.fabs) for fabs
+    pow_x.o(i.____hardfp_pow$lsc) refers to dflt_clz.o(x$fpl$dflt) for __aeabi_i2d
+    pow_x.o(i.____hardfp_pow$lsc) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    pow_x.o(i.____hardfp_pow$lsc) refers to daddsub_clz.o(x$fpl$dsub) for __aeabi_dsub
+    pow_x.o(i.____hardfp_pow$lsc) refers to daddsub_clz.o(x$fpl$drsb) for __aeabi_drsub
+    pow_x.o(i.____hardfp_pow$lsc) refers to qnan.o(.constdata) for __mathlib_zero
+    pow_x.o(i.____hardfp_pow$lsc) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    pow_x.o(i.____hardfp_pow$lsc) refers to poly.o(i.__kernel_poly) for __kernel_poly
+    pow_x.o(i.____hardfp_pow$lsc) refers to pow_x.o(.constdata) for .constdata
+    pow_x.o(i.____hardfp_pow$lsc) refers to drleqf.o(x$fpl$drleqf) for __aeabi_cdrcmple
+    pow_x.o(i.____hardfp_pow$lsc) refers to scalbn.o(x$fpl$scalbn) for __ARM_scalbn
+    pow_x.o(i.____softfp_pow$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow_x.o(i.____softfp_pow$lsc) refers to pow_x.o(i.____hardfp_pow$lsc) for ____hardfp_pow$lsc
+    pow_x.o(i.__pow$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    pow_x.o(i.__pow$lsc) refers to pow_x.o(i.____hardfp_pow$lsc) for ____hardfp_pow$lsc
+    pow_x.o(.constdata) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     __rtentry.o(.ARM.Collect$$rtentry$$00000000) refers (Special) to __rtentry2.o(.ARM.Collect$$rtentry$$0000000A) for __rt_entry_li
     __rtentry.o(.ARM.Collect$$rtentry$$00000000) refers (Special) to __rtentry2.o(.ARM.Collect$$rtentry$$0000000D) for __rt_entry_main
     __rtentry.o(.ARM.Collect$$rtentry$$00000000) refers (Special) to __rtentry2.o(.ARM.Collect$$rtentry$$0000000C) for __rt_entry_postli_1
@@ -1275,12 +1486,48 @@ Section Cross References
     __rtentry.o(.ARM.Collect$$rtentry$$00000000) refers (Special) to __rtentry2.o(.ARM.Collect$$rtentry$$00000002) for __rt_entry_presh_1
     __rtentry.o(.ARM.Collect$$rtentry$$00000000) refers (Special) to __rtentry4.o(.ARM.Collect$$rtentry$$00000004) for __rt_entry_sh
     aeabi_ldiv0_sigfpe.o(.text) refers to rt_div0.o(.text) for __rt_div0
+    _rserrno.o(.text) refers to rt_errno_addr_intlibspace.o(.text) for __aeabi_errno_addr
     rt_memclr.o(.text) refers to rt_memclr_w.o(.text) for _memset_w
-    dleqf.o(x$fpl$dleqf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
-    dleqf.o(x$fpl$dleqf) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
-    dleqf.o(x$fpl$dleqf) refers to dcmpi.o(x$fpl$dcmpinf) for __fpl_dcmp_Inf
+    dcmpi.o(x$fpl$dcmpinf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dnaninf.o(x$fpl$dnaninf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     dretinf.o(x$fpl$dretinf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    fnaninf.o(x$fpl$fnaninf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    fretinf.o(x$fpl$fretinf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    scalbn.o(x$fpl$scalbn) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    scalbn.o(x$fpl$scalbn) refers to dcheck1.o(x$fpl$dcheck1) for __fpl_dcheck_NaN1
+    dunder.o(i.__mathlib_dbl_divzero) refers to ddiv.o(x$fpl$ddiv) for __aeabi_ddiv
+    dunder.o(i.__mathlib_dbl_infnan) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    dunder.o(i.__mathlib_dbl_infnan2) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    dunder.o(i.__mathlib_dbl_invalid) refers to ddiv.o(x$fpl$ddiv) for __aeabi_ddiv
+    dunder.o(i.__mathlib_dbl_overflow) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    dunder.o(i.__mathlib_dbl_posinfnan) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    dunder.o(i.__mathlib_dbl_underflow) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    fpclassify.o(i.__ARM_fpclassify) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    poly.o(i.__kernel_poly) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    poly.o(i.__kernel_poly) refers to dmul.o(x$fpl$dmul) for __aeabi_dmul
+    poly.o(i.__kernel_poly) refers to daddsub_clz.o(x$fpl$dadd) for __aeabi_dadd
+    qnan.o(.constdata) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt.o(i.__hardfp_sqrt) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt.o(i.__hardfp_sqrt) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
+    sqrt.o(i.__hardfp_sqrt) refers to _rserrno.o(.text) for __set_errno
+    sqrt.o(i.__softfp_sqrt) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt.o(i.__softfp_sqrt) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
+    sqrt.o(i.__softfp_sqrt) refers to _rserrno.o(.text) for __set_errno
+    sqrt.o(i.sqrt) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt.o(i.sqrt) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
+    sqrt.o(i.sqrt) refers to _rserrno.o(.text) for __set_errno
+    sqrt_x.o(i.____hardfp_sqrt$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt_x.o(i.____hardfp_sqrt$lsc) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    sqrt_x.o(i.____hardfp_sqrt$lsc) refers to _rserrno.o(.text) for __set_errno
+    sqrt_x.o(i.____hardfp_sqrt$lsc) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
+    sqrt_x.o(i.____softfp_sqrt$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt_x.o(i.____softfp_sqrt$lsc) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    sqrt_x.o(i.____softfp_sqrt$lsc) refers to _rserrno.o(.text) for __set_errno
+    sqrt_x.o(i.____softfp_sqrt$lsc) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
+    sqrt_x.o(i.__sqrt$lsc) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    sqrt_x.o(i.__sqrt$lsc) refers to dleqf.o(x$fpl$dleqf) for __aeabi_cdcmple
+    sqrt_x.o(i.__sqrt$lsc) refers to _rserrno.o(.text) for __set_errno
+    sqrt_x.o(i.__sqrt$lsc) refers to dsqrt_umaal.o(x$fpl$dsqrt) for _dsqrt
     __rtentry2.o(.ARM.Collect$$rtentry$$00000008) refers to boardinit2.o(.text) for _platform_post_stackheap_init
     __rtentry2.o(.ARM.Collect$$rtentry$$0000000A) refers to libinit.o(.ARM.Collect$$libinit$$00000000) for __rt_lib_init
     __rtentry2.o(.ARM.Collect$$rtentry$$0000000B) refers to boardinit3.o(.text) for _platform_post_lib_init
@@ -1294,7 +1541,13 @@ Section Cross References
     __rtentry4.o(.ARM.Collect$$rtentry$$00000004) refers to sys_stackheap_outer.o(.text) for __user_setup_stackheap
     __rtentry4.o(.ARM.exidx) refers to __rtentry4.o(.ARM.Collect$$rtentry$$00000004) for .ARM.Collect$$rtentry$$00000004
     rt_div0.o(.text) refers to defsig_fpe_outer.o(.text) for __rt_SIGFPE
-    dcmpi.o(x$fpl$dcmpinf) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    rt_errno_addr.o(.text) refers to rt_errno_addr.o(.bss) for __aeabi_errno_addr_data
+    rt_errno_addr_intlibspace.o(.text) refers to libspace.o(.bss) for __libspace_start
+    dcheck1.o(x$fpl$dcheck1) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    dcheck1.o(x$fpl$dcheck1) refers to retnan.o(x$fpl$retnan) for __fpl_return_NaN
+    dsqrt_umaal.o(x$fpl$dsqrt) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    dsqrt_umaal.o(x$fpl$dsqrt) refers to dnaninf.o(x$fpl$dnaninf) for __fpl_dnaninf
+    libspace.o(.text) refers to libspace.o(.bss) for __libspace_start
     sys_stackheap_outer.o(.text) refers to libspace.o(.text) for __user_perproc_libspace
     sys_stackheap_outer.o(.text) refers to startup_stm32f407xx.o(.text) for __user_initial_stackheap
     exit.o(.text) refers to rtexit.o(.ARM.Collect$$rtexit$$00000000) for __rt_exit
@@ -1322,7 +1575,8 @@ Section Cross References
     libinit.o(.ARM.Collect$$libinit$$00000000) refers (Special) to libinit2.o(.ARM.Collect$$libinit$$0000001D) for __rt_lib_init_signal_1
     libinit.o(.ARM.Collect$$libinit$$00000000) refers (Special) to libinit2.o(.ARM.Collect$$libinit$$00000025) for __rt_lib_init_stdio_1
     libinit.o(.ARM.Collect$$libinit$$00000000) refers (Special) to libinit2.o(.ARM.Collect$$libinit$$0000000C) for __rt_lib_init_user_alloc_1
-    libspace.o(.text) refers to libspace.o(.bss) for __libspace_start
+    retnan.o(x$fpl$retnan) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
+    retnan.o(x$fpl$retnan) refers to trapv.o(x$fpl$trapveneer) for __fpl_cmpreturn
     rtexit.o(.ARM.Collect$$rtexit$$00000000) refers (Special) to rtexit2.o(.ARM.Collect$$rtexit$$00000004) for __rt_exit_exit
     rtexit.o(.ARM.Collect$$rtexit$$00000000) refers (Special) to rtexit2.o(.ARM.Collect$$rtexit$$00000003) for __rt_exit_ls
     rtexit.o(.ARM.Collect$$rtexit$$00000000) refers (Special) to rtexit2.o(.ARM.Collect$$rtexit$$00000002) for __rt_exit_prels_1
@@ -1342,6 +1596,7 @@ Section Cross References
     libinit2.o(.ARM.Collect$$libinit$$00000018) refers to libinit2.o(.ARM.Collect$$libinit$$0000000F) for .ARM.Collect$$libinit$$0000000F
     libinit2.o(.ARM.Collect$$libinit$$00000026) refers to argv_veneer.o(.emb_text) for __ARM_argv_veneer
     libinit2.o(.ARM.Collect$$libinit$$00000027) refers to argv_veneer.o(.emb_text) for __ARM_argv_veneer
+    trapv.o(x$fpl$trapveneer) refers (Special) to usenofp.o(x$fpl$usenofp) for __I$use$fp
     sys_exit.o(.text) refers (Special) to use_no_semi.o(.text) for __I$use$semihosting
     sys_exit.o(.text) refers (Special) to indicate_semi.o(.text) for __semihosting_library_function
     rtexit2.o(.ARM.Collect$$rtexit$$00000003) refers to libshutdown.o(.ARM.Collect$$libshutdown$$00000000) for __rt_lib_shutdown
@@ -1388,41 +1643,14 @@ Removing Unused input sections from the image.
     Removing main.o(.rev16_text), (4 bytes).
     Removing main.o(.revsh_text), (4 bytes).
     Removing main.o(.rrx_text), (6 bytes).
-    Removing main.o(i._Z10StartTask2PKv), (120 bytes).
-    Removing main.o(i._Z11MotorUpdatePKv), (372 bytes).
-    Removing main.o(i._Z12PidCalculateP3Pid), (518 bytes).
-    Removing main.o(i._Z12StartPidTaskPKv), (84 bytes).
-    Removing main.o(i._Z14MotorSetOutputP5Motor7PidModed), (108 bytes).
-    Removing main.o(i._Z19TransferToMotorSendP5Motor), (120 bytes).
-    Removing main.o(i._Z7PidInitP3Piddddddd), (26 bytes).
-    Removing main.o(i._Z9MotorInitP5Motorjhhddj), (108 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
-    Removing main.o(.ARM.exidx), (8 bytes).
+    Removing main.o(i.HAL_UART_RxCpltCallback), (36 bytes).
+    Removing main.o(i.SingingSome), (268 bytes).
     Removing gpio.o(.rev16_text), (4 bytes).
     Removing gpio.o(.revsh_text), (4 bytes).
     Removing gpio.o(.rrx_text), (6 bytes).
     Removing freertos.o(.rev16_text), (4 bytes).
     Removing freertos.o(.revsh_text), (4 bytes).
     Removing freertos.o(.rrx_text), (6 bytes).
-    Removing freertos.o(i.MX_FREERTOS_Init), (124 bytes).
-    Removing freertos.o(i.StartDefaultTask), (14 bytes).
-    Removing freertos.o(.constdata), (112 bytes).
-    Removing freertos.o(.conststring), (36 bytes).
-    Removing freertos.o(.data), (16 bytes).
     Removing can.o(.rev16_text), (4 bytes).
     Removing can.o(.revsh_text), (4 bytes).
     Removing can.o(.rrx_text), (6 bytes).
@@ -1432,6 +1660,10 @@ Removing Unused input sections from the image.
     Removing tim.o(.rrx_text), (6 bytes).
     Removing tim.o(i.HAL_TIM_Base_MspDeInit), (64 bytes).
     Removing tim.o(i.HAL_TIM_OnePulse_MspDeInit), (32 bytes).
+    Removing usart.o(.rev16_text), (4 bytes).
+    Removing usart.o(.revsh_text), (4 bytes).
+    Removing usart.o(.rrx_text), (6 bytes).
+    Removing usart.o(i.HAL_UART_MspDeInit), (60 bytes).
     Removing stm32f4xx_it.o(.rev16_text), (4 bytes).
     Removing stm32f4xx_it.o(.revsh_text), (4 bytes).
     Removing stm32f4xx_it.o(.rrx_text), (6 bytes).
@@ -1517,7 +1749,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_GetState), (8 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_MspDeInit), (2 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_PulseFinishedHalfCpltCallback), (2 bytes).
-    Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Start), (268 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Start_DMA), (588 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Start_IT), (352 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_PWM_Stop), (168 bytes).
@@ -1529,7 +1760,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_SlaveConfigSynchro), (108 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_SlaveConfigSynchro_IT), (108 bytes).
     Removing stm32f4xx_hal_tim.o(i.HAL_TIM_TriggerHalfCpltCallback), (2 bytes).
-    Removing stm32f4xx_hal_tim.o(i.TIM_CCxChannelCmd), (34 bytes).
     Removing stm32f4xx_hal_tim.o(i.TIM_DMACaptureCplt), (122 bytes).
     Removing stm32f4xx_hal_tim.o(i.TIM_DMACaptureHalfCplt), (64 bytes).
     Removing stm32f4xx_hal_tim.o(i.TIM_DMADelayPulseCplt), (104 bytes).
@@ -1598,13 +1828,10 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_DevConnect), (70 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_DevDisconnect), (70 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_DisconnectCallback), (2 bytes).
-    Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_EP_Close), (106 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_EP_Flush), (68 bytes).
-    Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_EP_GetRxCount), (22 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_GetState), (8 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_ISOINIncompleteCallback), (2 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_ISOOUTIncompleteCallback), (2 bytes).
-    Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_Init), (350 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_MspDeInit), (2 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_MspInit), (2 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_ResetCallback), (2 bytes).
@@ -1612,7 +1839,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_SOFCallback), (2 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_SetTestMode), (68 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_SetupStageCallback), (2 bytes).
-    Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_Start), (76 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_Stop), (84 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_SuspendCallback), (2 bytes).
     Removing stm32f4xx_hal_pcd.o(i.HAL_PCD_WKUP_IRQHandler), (32 bytes).
@@ -1620,27 +1846,16 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_pcd_ex.o(.revsh_text), (4 bytes).
     Removing stm32f4xx_hal_pcd_ex.o(.rrx_text), (6 bytes).
     Removing stm32f4xx_hal_pcd_ex.o(i.HAL_PCDEx_BCD_Callback), (2 bytes).
-    Removing stm32f4xx_hal_pcd_ex.o(i.HAL_PCDEx_SetRxFiFo), (10 bytes).
-    Removing stm32f4xx_hal_pcd_ex.o(i.HAL_PCDEx_SetTxFiFo), (78 bytes).
     Removing stm32f4xx_ll_usb.o(.rev16_text), (4 bytes).
     Removing stm32f4xx_ll_usb.o(.revsh_text), (4 bytes).
     Removing stm32f4xx_ll_usb.o(.rrx_text), (6 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_ActivateDedicatedEndpoint), (204 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_ActivateRemoteWakeup), (36 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_ClearInterrupts), (8 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_CoreInit), (140 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_CoreReset), (98 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_DeActivateRemoteWakeup), (24 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_DeactivateDedicatedEndpoint), (268 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_DeactivateEndpoint), (332 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_DevConnect), (36 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_DevDisconnect), (36 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_DevInit), (488 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_DisableGlobalInt), (14 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_DoPing), (68 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_DriveVbus), (74 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_EnableGlobalInt), (14 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_FlushRxFifo), (80 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_GetCurrentFrame), (14 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_GetHostSpeed), (24 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_HC_Halt), (438 bytes).
@@ -1651,8 +1866,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_ll_usb.o(i.USB_InitFSLSPClkSel), (74 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_ReadChInterrupts), (30 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_ResetPort), (60 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_SetCurrentMode), (104 bytes).
-    Removing stm32f4xx_ll_usb.o(i.USB_SetDevSpeed), (18 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_StopDevice), (92 bytes).
     Removing stm32f4xx_ll_usb.o(i.USB_StopHost), (198 bytes).
     Removing stm32f4xx_hal_rcc.o(.rev16_text), (4 bytes).
@@ -1663,7 +1876,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_DisableCSS), (12 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_EnableCSS), (12 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_GetOscConfig), (244 bytes).
-    Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_GetPCLK1Freq), (32 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_MCOConfig), (192 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_NMI_IRQHandler), (32 bytes).
     Removing stm32f4xx_hal_rcc_ex.o(.rev16_text), (4 bytes).
@@ -1723,7 +1935,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_gpio.o(.rrx_text), (6 bytes).
     Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_DeInit), (360 bytes).
     Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_Callback), (2 bytes).
-    Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_EXTI_IRQHandler), (28 bytes).
     Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_LockPin), (46 bytes).
     Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin), (16 bytes).
     Removing stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin), (20 bytes).
@@ -1813,7 +2024,6 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal.o(i.HAL_DBGMCU_EnableDBGStandbyMode), (20 bytes).
     Removing stm32f4xx_hal.o(i.HAL_DBGMCU_EnableDBGStopMode), (20 bytes).
     Removing stm32f4xx_hal.o(i.HAL_DeInit), (80 bytes).
-    Removing stm32f4xx_hal.o(i.HAL_Delay), (40 bytes).
     Removing stm32f4xx_hal.o(i.HAL_DisableCompensationCell), (12 bytes).
     Removing stm32f4xx_hal.o(i.HAL_EnableCompensationCell), (12 bytes).
     Removing stm32f4xx_hal.o(i.HAL_GetDEVID), (16 bytes).
@@ -1862,6 +2072,69 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_can.o(i.HAL_CAN_RxFifo0MsgPendingCallback), (2 bytes).
     Removing stm32f4xx_hal_can.o(i.HAL_CAN_Stop), (106 bytes).
     Removing stm32f4xx_hal_can.o(i.HAL_CAN_WakeUp), (92 bytes).
+    Removing stm32f4xx_hal_uart.o(.rev16_text), (4 bytes).
+    Removing stm32f4xx_hal_uart.o(.revsh_text), (4 bytes).
+    Removing stm32f4xx_hal_uart.o(.rrx_text), (6 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_HalfDuplex_EnableReceiver), (68 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_HalfDuplex_EnableTransmitter), (68 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_HalfDuplex_Init), (122 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_LIN_Init), (146 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_LIN_SendBreak), (80 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_MultiProcessor_EnterMuteMode), (82 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_MultiProcessor_ExitMuteMode), (82 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_MultiProcessor_Init), (158 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UARTEx_GetRxEventType), (6 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle), (296 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle_DMA), (112 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UARTEx_ReceiveToIdle_IT), (114 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UARTEx_RxEventCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Abort), (282 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive), (196 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceiveCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortReceive_IT), (220 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit), (126 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmitCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_AbortTransmit_IT), (144 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Abort_IT), (336 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_DMAPause), (166 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_DMAResume), (170 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_DMAStop), (138 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_DeInit), (62 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_ErrorCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_GetError), (6 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_GetState), (20 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_IRQHandler), (776 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_MspDeInit), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_MspInit), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Receive), (194 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Receive_DMA), (44 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Receive_IT), (44 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_RxCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_RxHalfCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Transmit), (190 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_DMA), (156 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_Transmit_IT), (56 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_TxCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.HAL_UART_TxHalfCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError), (18 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMAError), (80 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt), (180 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMARxAbortCallback), (56 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt), (36 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMARxOnlyAbortCallback), (28 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMATransmitCplt), (88 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMATxAbortCallback), (56 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMATxHalfCplt), (14 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_DMATxOnlyAbortCallback), (24 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_EndRxTransfer), (108 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_EndTransmit_IT), (32 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_EndTxTransfer), (38 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_Receive_IT), (252 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_Start_Receive_DMA), (216 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_Start_Receive_IT), (64 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_Transmit_IT), (96 bytes).
+    Removing stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout), (140 bytes).
     Removing system_stm32f4xx.o(.rev16_text), (4 bytes).
     Removing system_stm32f4xx.o(.revsh_text), (4 bytes).
     Removing system_stm32f4xx.o(.rrx_text), (6 bytes).
@@ -1877,7 +2150,6 @@ Removing Unused input sections from the image.
     Removing event_groups.o(i.xEventGroupSetBits), (206 bytes).
     Removing event_groups.o(i.xEventGroupSync), (272 bytes).
     Removing event_groups.o(i.xEventGroupWaitBits), (344 bytes).
-    Removing list.o(i.vListInsert), (52 bytes).
     Removing queue.o(i.pcQueueGetName), (44 bytes).
     Removing queue.o(i.prvCopyDataFromQueue), (42 bytes).
     Removing queue.o(i.prvCopyDataToQueue), (126 bytes).
@@ -1932,7 +2204,6 @@ Removing Unused input sections from the image.
     Removing stream_buffer.o(i.xStreamBufferSetTriggerLevel), (50 bytes).
     Removing stream_buffer.o(i.xStreamBufferSpacesAvailable), (54 bytes).
     Removing tasks.o(i.pcTaskGetName), (48 bytes).
-    Removing tasks.o(i.prvAddCurrentTaskToDelayedList), (152 bytes).
     Removing tasks.o(i.prvTaskIsTaskSuspended), (88 bytes).
     Removing tasks.o(i.pvTaskIncrementMutexHeldCount), (32 bytes).
     Removing tasks.o(i.ulTaskNotifyTake), (116 bytes).
@@ -1941,7 +2212,6 @@ Removing Unused input sections from the image.
     Removing tasks.o(i.uxTaskPriorityGet), (36 bytes).
     Removing tasks.o(i.uxTaskPriorityGetFromISR), (68 bytes).
     Removing tasks.o(i.uxTaskResetEventItemValue), (28 bytes).
-    Removing tasks.o(i.vTaskDelay), (92 bytes).
     Removing tasks.o(i.vTaskDelete), (244 bytes).
     Removing tasks.o(i.vTaskEndScheduler), (36 bytes).
     Removing tasks.o(i.vTaskInternalSetTimeOutState), (24 bytes).
@@ -1957,7 +2227,6 @@ Removing Unused input sections from the image.
     Removing tasks.o(i.vTaskSuspend), (244 bytes).
     Removing tasks.o(i.xTaskCatchUpTicks), (76 bytes).
     Removing tasks.o(i.xTaskCheckForTimeOut), (140 bytes).
-    Removing tasks.o(i.xTaskCreate), (100 bytes).
     Removing tasks.o(i.xTaskGenericNotify), (296 bytes).
     Removing tasks.o(i.xTaskGenericNotifyFromISR), (360 bytes).
     Removing tasks.o(i.xTaskGetCurrentTaskHandle), (12 bytes).
@@ -1975,9 +2244,7 @@ Removing Unused input sections from the image.
     Removing cmsis_os.o(.rrx_text), (6 bytes).
     Removing cmsis_os.o(i.inHandlerMode), (16 bytes).
     Removing cmsis_os.o(i.makeCmsisPriority), (18 bytes).
-    Removing cmsis_os.o(i.makeFreeRtosPriority), (14 bytes).
     Removing cmsis_os.o(i.osAbortDelay), (6 bytes).
-    Removing cmsis_os.o(i.osDelay), (24 bytes).
     Removing cmsis_os.o(i.osDelayUntil), (6 bytes).
     Removing cmsis_os.o(i.osKernelRunning), (18 bytes).
     Removing cmsis_os.o(i.osKernelSysTick), (20 bytes).
@@ -2013,7 +2280,6 @@ Removing Unused input sections from the image.
     Removing cmsis_os.o(i.osSignalSet), (96 bytes).
     Removing cmsis_os.o(i.osSignalWait), (98 bytes).
     Removing cmsis_os.o(i.osSystickHandler), (16 bytes).
-    Removing cmsis_os.o(i.osThreadCreate), (94 bytes).
     Removing cmsis_os.o(i.osThreadGetId), (8 bytes).
     Removing cmsis_os.o(i.osThreadGetPriority), (38 bytes).
     Removing cmsis_os.o(i.osThreadList), (6 bytes).
@@ -2028,98 +2294,43 @@ Removing Unused input sections from the image.
     Removing cmsis_os.o(i.osTimerDelete), (8 bytes).
     Removing cmsis_os.o(i.osTimerStart), (8 bytes).
     Removing cmsis_os.o(i.osTimerStop), (8 bytes).
-    Removing heap_4.o(i.prvHeapInit), (124 bytes).
-    Removing heap_4.o(i.pvPortMalloc), (332 bytes).
     Removing heap_4.o(i.vPortGetHeapStats), (128 bytes).
     Removing heap_4.o(i.vPortInitialiseBlocks), (2 bytes).
     Removing heap_4.o(i.xPortGetFreeHeapSize), (12 bytes).
     Removing heap_4.o(i.xPortGetMinimumEverFreeHeapSize), (12 bytes).
-    Removing heap_4.o(.bss), (15360 bytes).
     Removing port.o(i.vPortEndScheduler), (48 bytes).
     Removing port.o(i.vPortValidateInterruptPriority), (120 bytes).
     Removing usb_device.o(.rev16_text), (4 bytes).
     Removing usb_device.o(.revsh_text), (4 bytes).
     Removing usb_device.o(.rrx_text), (6 bytes).
-    Removing usb_device.o(i.MX_USB_DEVICE_Init), (76 bytes).
-    Removing usb_device.o(.bss), (732 bytes).
     Removing usbd_desc.o(.rev16_text), (4 bytes).
     Removing usbd_desc.o(.revsh_text), (4 bytes).
     Removing usbd_desc.o(.rrx_text), (6 bytes).
-    Removing usbd_desc.o(i.Get_SerialNum), (52 bytes).
-    Removing usbd_desc.o(i.IntToUnicode), (62 bytes).
-    Removing usbd_desc.o(i.USBD_FS_ConfigStrDescriptor), (52 bytes).
-    Removing usbd_desc.o(i.USBD_FS_DeviceDescriptor), (16 bytes).
-    Removing usbd_desc.o(i.USBD_FS_InterfaceStrDescriptor), (56 bytes).
-    Removing usbd_desc.o(i.USBD_FS_LangIDStrDescriptor), (16 bytes).
-    Removing usbd_desc.o(i.USBD_FS_ManufacturerStrDescriptor), (44 bytes).
-    Removing usbd_desc.o(i.USBD_FS_ProductStrDescriptor), (64 bytes).
-    Removing usbd_desc.o(i.USBD_FS_SerialStrDescriptor), (24 bytes).
-    Removing usbd_desc.o(.bss), (512 bytes).
-    Removing usbd_desc.o(.data), (78 bytes).
     Removing usbd_cdc_if.o(.rev16_text), (4 bytes).
     Removing usbd_cdc_if.o(.revsh_text), (4 bytes).
     Removing usbd_cdc_if.o(.rrx_text), (6 bytes).
-    Removing usbd_cdc_if.o(i.CDC_Control_FS), (68 bytes).
-    Removing usbd_cdc_if.o(i.CDC_DeInit_FS), (4 bytes).
-    Removing usbd_cdc_if.o(i.CDC_Init_FS), (36 bytes).
-    Removing usbd_cdc_if.o(i.CDC_Receive_FS), (28 bytes).
-    Removing usbd_cdc_if.o(i.CDC_TransmitCplt_FS), (12 bytes).
-    Removing usbd_cdc_if.o(i.CDC_Transmit_FS), (56 bytes).
-    Removing usbd_cdc_if.o(.bss), (4096 bytes).
-    Removing usbd_cdc_if.o(.data), (20 bytes).
     Removing usbd_conf.o(.rev16_text), (4 bytes).
     Removing usbd_conf.o(.revsh_text), (4 bytes).
     Removing usbd_conf.o(.rrx_text), (6 bytes).
     Removing usbd_conf.o(i.HAL_PCD_MspDeInit), (52 bytes).
-    Removing usbd_conf.o(i.HAL_PCD_MspInit), (168 bytes).
-    Removing usbd_conf.o(i.USBD_LL_CloseEP), (38 bytes).
     Removing usbd_conf.o(i.USBD_LL_DeInit), (30 bytes).
     Removing usbd_conf.o(i.USBD_LL_Delay), (12 bytes).
     Removing usbd_conf.o(i.USBD_LL_FlushEP), (38 bytes).
-    Removing usbd_conf.o(i.USBD_LL_GetRxDataSize), (18 bytes).
-    Removing usbd_conf.o(i.USBD_LL_Init), (104 bytes).
-    Removing usbd_conf.o(i.USBD_LL_Start), (30 bytes).
     Removing usbd_conf.o(i.USBD_LL_Stop), (30 bytes).
-    Removing usbd_conf.o(i.USBD_static_free), (2 bytes).
-    Removing usbd_conf.o(i.USBD_static_malloc), (12 bytes).
     Removing usbd_core.o(.rev16_text), (4 bytes).
     Removing usbd_core.o(.revsh_text), (4 bytes).
     Removing usbd_core.o(.rrx_text), (6 bytes).
     Removing usbd_core.o(i.USBD_DeInit), (60 bytes).
-    Removing usbd_core.o(i.USBD_GetEpDesc), (80 bytes).
-    Removing usbd_core.o(i.USBD_GetNextDesc), (20 bytes).
-    Removing usbd_core.o(i.USBD_Init), (58 bytes).
-    Removing usbd_core.o(i.USBD_RegisterClass), (72 bytes).
-    Removing usbd_core.o(i.USBD_Start), (12 bytes).
     Removing usbd_core.o(i.USBD_Stop), (32 bytes).
     Removing usbd_ctlreq.o(.rev16_text), (4 bytes).
     Removing usbd_ctlreq.o(.revsh_text), (4 bytes).
     Removing usbd_ctlreq.o(.rrx_text), (6 bytes).
-    Removing usbd_ctlreq.o(i.USBD_GetLen), (22 bytes).
-    Removing usbd_ctlreq.o(i.USBD_GetString), (104 bytes).
     Removing usbd_ioreq.o(.rev16_text), (4 bytes).
     Removing usbd_ioreq.o(.revsh_text), (4 bytes).
     Removing usbd_ioreq.o(.rrx_text), (6 bytes).
-    Removing usbd_ioreq.o(i.USBD_CtlPrepareRx), (46 bytes).
     Removing usbd_ioreq.o(i.USBD_GetRxCount), (16 bytes).
     Removing usbd_cdc.o(.rev16_text), (4 bytes).
     Removing usbd_cdc.o(.revsh_text), (4 bytes).
     Removing usbd_cdc.o(.rrx_text), (6 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_DataIn), (190 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_DataOut), (72 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_DeInit), (212 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_EP0_RxReady), (80 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_GetDeviceQualifierDescriptor), (16 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_GetFSCfgDesc), (68 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_GetHSCfgDesc), (72 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_GetOtherSpeedCfgDesc), (68 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_Init), (416 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_ReceivePacket), (80 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_RegisterInterface), (24 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_SetRxBuffer), (30 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_SetTxBuffer), (36 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_Setup), (320 bytes).
-    Removing usbd_cdc.o(i.USBD_CDC_TransmitPacket), (88 bytes).
-    Removing usbd_cdc.o(.data), (138 bytes).
 
-736 unused section(s) (total 82606 bytes) removed from the image.
+692 unused section(s) (total 59772 bytes) removed from the image.

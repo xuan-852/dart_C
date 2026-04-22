@@ -1,0 +1,31 @@
+﻿
+>     361  $d                         0x0800c05e   Lc    1   --   De 
+>     362  $t                         0x0800c062   Lc    1   --   De 
+      363  $d.realdata                0x0800c184   Lc    1   --   De 
+      364  $d.realdata                0x20000000   Lc    2   --   De 
+>     1100  x$fpl$fretinf              0x0800c088   Lc    1  Sect  De   0xa
+>     1101  $v0                        0x0800c088   Lc    1   --   De 
+      1102  ../fplib/scalbn.s          0x00000000   Lc  Abs  File  De 
+>     1103  x$fpl$scalbn               0x0800c0f6   Lc    1  Sect  De   0x5c
+>     1104  $v0                        0x0800c0f6   Lc    1   --   De 
+      1105  ../fplib/usenofp.s         0x00000000   Lc  Abs  File  De 
+      1106  x$fpl$usenofp              0x0800c182   Lc    1  Sect  De 
+>     1160  x$fpl$fpinit               0x0800c07e   Lc    1  Sect  De   0xa
+>     1161  $v0                        0x0800c07e   Lc    1   --   De 
+      1162  ../clib/angel/sys.s        0x00000000   Lc  Abs  File  De 
+      1163  .text                      0x080006d2   Lc    1  Sect  De   0x2
+>     1186  x$fpl$retnan               0x0800c092   Lc    1  Sect  De   0x64
+>     1187  $v0                        0x0800c092   Lc    1   --   De 
+      1188  ../clib/angel/sysapp.c     0x00000000   Lc  Abs  File  De 
+      1189  .text                      0x0800078c   Lc    1  Sect  De 
+>     1737  _fp_init                   0x0800c07f   Gb    1  Code  De   0xa
+>     1738  __fplib_config_fpu_vfp     0x0800c087   Gb    1  Code  De 
+      1739  __fplib_config_pureend_doubles
+>                                     0x0800c087   Gb    1  Code  De 
+>     1740  __fpl_fretinf              0x0800c089   Gb    1  Code  De   0xa
+>     1741  __fpl_return_NaN           0x0800c093   Gb    1  Code  Hi   0x64
+>     1742  __ARM_scalbn               0x0800c0f7   Gb    1  Code  De   0x5c
+      1743  __fpl_cmpreturn            0x0800c153   Gb    1  Code  Hi   0x30
+      1744  __I$use$fp                 0x0800c182   Gb    1   --   Hi 
+
+

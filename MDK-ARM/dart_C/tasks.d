@@ -1,9 +1,9 @@
 dart_c\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c
-dart_c\tasks.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-dart_c\tasks.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+dart_c\tasks.o: D:\keil\ARM\ARMCC\Bin\..\include\stdlib.h
+dart_c\tasks.o: D:\keil\ARM\ARMCC\Bin\..\include\string.h
 dart_c\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dart_c\tasks.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-dart_c\tasks.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dart_c\tasks.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+dart_c\tasks.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 dart_c\tasks.o: ../Core/Inc/FreeRTOSConfig.h
 dart_c\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dart_c\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

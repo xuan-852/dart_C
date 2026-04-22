@@ -116,6 +116,7 @@ void MotorInit(Motor *motor,uint32_t StdId,uint8_t motor_byte);
 //,uint8_t maxTemp,double maxTorque, double stallOutput, double stallSpeedThreshold, uint32_t stallTimeThreshold)
 //初始化电机结构体
 void MotorSafetyInit(Motor *motor, uint8_t maxTemp, double maxTorque, double stallOutput, double stallSpeedThreshold, uint32_t stallTimeThreshold);
+void MotorFilterUpdate(Motor *motor);//在任务上下文中更新电机滤波结果
 //初始化电机安全保护参数
 void MotorRunToStall(Motor *motor, double speed);//以指定速度运行电机直到堵转
 void MotorSetOutput(Motor *motor, enum MotorMode mode, double value);//设置输出
@@ -386,15 +387,30 @@ void RecReceiveMotor(Motor *motor,uint8_t *data){//接收对应的电机数据
   motor->motorState.rpmRaw = (double)rpm_raw;
   motor->motorState.torqueRaw = (double)torque_raw;
 
-  Filter_update(&motor->motorState.rpmFilter, (float)rpm_raw);
-  Filter_update(&motor->motorState.torqueFilter, (float)torque_raw);
-  motor->motorState.rpm = (double)Filter_get_output(&motor->motorState.rpmFilter);
-  motor->motorState.torque = (double)Filter_get_output(&motor->motorState.torqueFilter);
-
   motor->motorState.tempr=(int8_t)data[6];
   int deltaAngle = (int)(((uint16_t)data[0]<<8)|data[1])-(int)motor->motorState.singleAngle;//角度增量
   motor->motorState.singleAngle = ((uint16_t)data[0]<<8)|data[1];//记录当前角度
   if(abs(deltaAngle) < 4096) motor->motorState.angle += deltaAngle;
+}
+
+// 在任务上下文中做滤波，避免在中断里执行浮点运算
+void MotorFilterUpdate(Motor *motor)
+{
+  if (motor == NULL) {
+    return;
+  }
+
+  // 临时排查HardFault：先完全旁路Filter，直接使用原始反馈值
+  // if ((motor->motorState.rpmFilter.magic != FILTER_MAGIC) || (motor->motorState.torqueFilter.magic != FILTER_MAGIC)) {
+  //   return;
+  // }
+  // Filter_update(&motor->motorState.rpmFilter, (float)motor->motorState.rpmRaw);
+  // Filter_update(&motor->motorState.torqueFilter, (float)motor->motorState.torqueRaw);
+  // motor->motorState.rpm = (double)Filter_get_output(&motor->motorState.rpmFilter);
+  // motor->motorState.torque = (double)Filter_get_output(&motor->motorState.torqueFilter);
+
+  motor->motorState.rpm = motor->motorState.rpmRaw;
+  motor->motorState.torque = motor->motorState.torqueRaw;
 }
 
 //根据电机的StdId来决定发送到哪个MotorSend结构体中
@@ -422,8 +438,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)//HAL库接收中
   {
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK)
     {
-      // TODO: 在这里处理接收到的数据 RxData
-      RecReceiveMotor(motor_array[RxHeader.StdId - 0x201],RxData);
+      // 仅处理电机反馈ID(0x201~0x207)，避免数组越界导致HardFault
+      if (RxHeader.IDE == CAN_ID_STD && RxHeader.StdId >= 0x201 && RxHeader.StdId <= 0x207)
+      {
+        uint32_t idx = RxHeader.StdId - 0x201;
+        if (idx < MOTOR_NUM)
+        {
+          RecReceiveMotor(motor_array[idx], RxData);
+        }
+      }
     }
   }
 }
@@ -483,8 +506,9 @@ void MotorInit(Motor *motor,uint32_t StdId,uint8_t motor_byte)
   motor->torquePid.outputAdress = NULL;
 
   // 初始化滤波器
-  (void)Filter_Init(&motor->motorState.rpmFilter, Fiter_Type_LPF, RPM_FILTER_ALPHA, 0.0f);//这里采用低通滤波
-  (void)Filter_Init(&motor->motorState.torqueFilter, Fiter_Type_LPF, TORQUE_FILTER_ALPHA, 0.0f);
+  // 临时排查HardFault：先注释Filter初始化
+  // (void)Filter_Init(&motor->motorState.rpmFilter, Fiter_Type_LPF, RPM_FILTER_ALPHA, 0.0f);//这里采用低通滤波
+  // (void)Filter_Init(&motor->motorState.torqueFilter, Fiter_Type_LPF, TORQUE_FILTER_ALPHA, 0.0f);
 }
 void MotorSafetyInit(Motor *motor, uint8_t maxTemp, double maxTorque, double stallOutput, double stallSpeedThreshold, uint32_t stallTimeThreshold){
   motor->maxTemp = maxTemp;
@@ -898,6 +922,7 @@ void MotorUpdate(void const * argument)
 
     for(int i=0;i<MOTOR_NUM;i++){
       Motor *m = motor_array[i];//遍历每一个电机来更新数据
+      MotorFilterUpdate(m);
       // PID calculation moved to StartPidTask
       if(m->motorState.motorMode == disable){
         m->motorState.isStalled = 0; // Clear stalled flag
@@ -1116,7 +1141,7 @@ void StartTask2(void const * argument)
   // 3. 设置初始输出为 0
   MotorSetOutput(&GM6020, speedMode, 0);
   MotorSetOutput(&fric1, angleMode, 0);
-  MotorSetOutput(&fric2, speedMode, 0);
+  MotorSetOutput(&fric2, angleMode, 0);
   MotorSetOutput(&fric3, angleMode, 0);
   MotorSetOutput(&fric4, angleMode, 0);
   MotorSetOutput(&lift, speedMode, 0);
@@ -1302,14 +1327,6 @@ void StartPidTask(void const * argument)
   /* USER CODE END StartDefaultTask */
 }
 /* USER CODE END 4 */
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  if (huart->Instance == USART1)
-  {
-    (void)Referee_OnUartRxCplt(&g_referee, HAL_GetTick());
-  }
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode

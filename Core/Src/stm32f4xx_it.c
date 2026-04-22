@@ -52,6 +52,26 @@
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+static uint8_t try_recover_nocp_fault(void)
+{
+  const uint32_t kUfsrNocp = (1UL << 19);
+
+  if ((SCB->CFSR & kUfsrNocp) == 0U) {
+    return 0U;
+  }
+
+  SCB->CPACR |= ((3UL << 10U * 2U) | (3UL << 11U * 2U));
+  __DSB();
+  __ISB();
+
+  /* Write-1-to-clear the NOCP usage fault flag. */
+  SCB->CFSR = kUfsrNocp;
+  /* Clear FORCED in HFSR in case UsageFault was escalated to HardFault. */
+  SCB->HFSR = SCB_HFSR_FORCED_Msk;
+
+  return 1U;
+}
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -59,6 +79,7 @@ extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim2;
+extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
@@ -89,6 +110,12 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+  if (try_recover_nocp_fault() != 0U)
+  {
+    return;
+  }
+
+  NVIC_SystemReset();
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
@@ -134,6 +161,12 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
+  if (try_recover_nocp_fault() != 0U)
+  {
+    return;
+  }
+
+  NVIC_SystemReset();
 
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
@@ -231,6 +264,20 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**

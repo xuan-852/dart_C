@@ -1,7 +1,7 @@
 dart_c\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c
 dart_c\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dart_c\port.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-dart_c\port.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dart_c\port.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+dart_c\port.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 dart_c\port.o: ../Core/Inc/FreeRTOSConfig.h
 dart_c\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dart_c\port.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

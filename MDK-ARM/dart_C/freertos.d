@@ -1,7 +1,7 @@
 dart_c\freertos.o: ../Core/Src/freertos.c
 dart_c\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dart_c\freertos.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
-dart_c\freertos.o: D:\Program Files\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dart_c\freertos.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+dart_c\freertos.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 dart_c\freertos.o: ../Core/Inc/FreeRTOSConfig.h
 dart_c\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dart_c\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -40,6 +40,7 @@ dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
+dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 dart_c\freertos.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h

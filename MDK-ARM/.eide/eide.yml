@@ -1,7 +1,7 @@
 version: "4.1"
 name: dart_C
 type: ARM
-deviceName: null
+deviceName: STM32F407IGHx
 packDir: null
 srcDirs: []
 virtualFolder:
@@ -238,8 +238,8 @@ targets:
         baseAddr: ""
         bin: ""
         cpuInfo:
-          cpuName: "null"
-          vendor: "null"
+          cpuName: STM32F407IGHx
+          vendor: STMicroelectronics
         otherCmds: ""
         proType: 1
         speed: 8000

@@ -9,6 +9,9 @@ extern "C" {
 
 typedef struct filter filter_t;
 
+#define FILTER_MAGIC 0x46494C54u
+#define FILTER_HISTORY_MAX_LEN 3
+
 // Filter type enum
 typedef enum {//滤波器类型
     Fiter_Type_LPF = 0,
@@ -29,6 +32,8 @@ struct filter {//滤波器基对象
     float sample_rate;
     float *history;
     int history_len;
+    uint32_t magic;
+    float history_buf[FILTER_HISTORY_MAX_LEN];
 
     // Internal state for 3-sample moving average
     float last_output;

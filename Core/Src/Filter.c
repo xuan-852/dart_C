@@ -1,15 +1,19 @@
 #include "Filter.h"
 
 #include <stddef.h>
-#include <stdlib.h>
 
 static const int FILTER_MOVING_AVG_LEN = 3;
+
+static int filter_is_valid(const filter_t *me)
+{
+    return (me != NULL) && (me->magic == FILTER_MAGIC);
+}
 
 static float get_smoothing_alpha(const filter_t *me)//进行限制，确保alpha在0到1之间
 {
     float alpha;
 
-    if (me == NULL) {
+    if (!filter_is_valid(me)) {
         return 1.0f;
     }
 
@@ -28,6 +32,14 @@ static void update_history(filter_t *me, float input)
 {
     int i;
 
+    if (!filter_is_valid(me)) {
+        return;
+    }
+
+    if ((me->history == NULL) || (me->history_len <= 0) || (me->history_len > FILTER_HISTORY_MAX_LEN)) {
+        return;
+    }
+
     for (i = me->history_len - 1; i > 0; i--) {
         me->history[i] = me->history[i - 1];
     }
@@ -40,7 +52,7 @@ static float calculate_average(const filter_t *me)
     float sum = 0.0f;
     int i;
 
-    if ((me == NULL) || (me->history == NULL) || (me->history_len <= 0)) {
+    if (!filter_is_valid(me) || (me->history == NULL) || (me->history_len <= 0) || (me->history_len > FILTER_HISTORY_MAX_LEN)) {
         return 0.0f;
     }
 
@@ -56,7 +68,7 @@ static void avg_update(filter_t *me, float input)
     float avg_value;
     float alpha;
 
-    if ((me == NULL) || (me->history == NULL) || (me->history_len <= 0)) {
+    if (!filter_is_valid(me) || (me->history == NULL) || (me->history_len <= 0) || (me->history_len > FILTER_HISTORY_MAX_LEN)) {
         return;
     }
 
@@ -68,7 +80,7 @@ static void avg_update(filter_t *me, float input)
 
 static float avg_get_output(filter_t *me)
 {
-    if (me == NULL) {
+    if (!filter_is_valid(me)) {
         return 0.0f;
     }
 
@@ -93,25 +105,21 @@ int Filter_Init(filter_t *me, filter_type_t type, float cutoff_freq, float sampl
     me->history_len = FILTER_MOVING_AVG_LEN;
     me->last_output = 0.0f;
 
-    me->history = (float *)malloc((size_t)me->history_len * sizeof(float));
-    if (me->history == NULL) {
-        me->ops = NULL;
-        me->history_len = 0;
-        return -2;
-    }
+    me->history = me->history_buf;
 
     for (i = 0; i < me->history_len; i++) {
         me->history[i] = 0.0f;
     }
 
     me->ops = &avg_ops;
+    me->magic = FILTER_MAGIC;
 
     return 0;
 }
 
 void Filter_update(filter_t *me, float input)
 {
-    if ((me == NULL) || (me->ops == NULL) || (me->ops->update == NULL)) {
+    if (!filter_is_valid(me) || (me->ops == NULL) || (me->ops->update == NULL)) {
         return;
     }
 
@@ -120,7 +128,7 @@ void Filter_update(filter_t *me, float input)
 
 float Filter_get_output(filter_t *me)
 {
-    if ((me == NULL) || (me->ops == NULL) || (me->ops->get_output == NULL)) {
+    if (!filter_is_valid(me) || (me->ops == NULL) || (me->ops->get_output == NULL)) {
         return 0.0f;
     }
 
@@ -133,9 +141,9 @@ void Filter_deinit(filter_t *me)
         return;
     }
 
-    free(me->history);
     me->history = NULL;
     me->history_len = 0;
     me->last_output = 0.0f;
     me->ops = NULL;
+    me->magic = 0;
 }
