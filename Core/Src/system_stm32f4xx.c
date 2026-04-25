@@ -174,6 +174,13 @@ void SystemInit(void)
     __ISB();
   #endif
 
+  /* In debug sessions, avoid halting on transient HardFault vector-catch.
+     Fault handlers still run; this only changes debugger stop behavior. */
+  if ((CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) != 0U)
+  {
+    CoreDebug->DEMCR &= ~CoreDebug_DEMCR_VC_HARDERR_Msk;
+  }
+
 #if defined (DATA_IN_ExtSRAM) || defined (DATA_IN_ExtSDRAM)
   SystemInit_ExtMemCtl(); 
 #endif /* DATA_IN_ExtSRAM || DATA_IN_ExtSDRAM */

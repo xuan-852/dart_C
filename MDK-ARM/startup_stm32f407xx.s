@@ -176,6 +176,14 @@ Reset_Handler    PROC
                  LDR     R1, [R0]
                  ORR     R1, R1, #0x00F00000
                  STR     R1, [R0]
+
+                 ; Disable HardFault vector catch early to avoid debugger stop on
+                 ; transient recoverable faults before C runtime is fully up.
+                 LDR     R0, =0xE000EDFC
+                 LDR     R1, [R0]
+                 BIC     R1, R1, #0x00000400
+                 STR     R1, [R0]
+
                  DSB
                  ISB
 

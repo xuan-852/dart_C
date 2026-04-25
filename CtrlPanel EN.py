@@ -10,6 +10,10 @@ import time
 DEFAULT_PORT = 'COM27' # User might need to change this, but safe default
 BAUDRATE = 115200
 MOTOR_NUM = 7
+MOTOR_FRAME_HEADER = 0x81
+REFEREE_FRAME_HEADER = 0x82
+MOTOR_FRAME_LEN = 14
+REFEREE_FRAME_LEN = 12
 
 class MotorControlApp:
     def __init__(self, root):
@@ -40,6 +44,16 @@ class MotorControlApp:
             for _ in range(MOTOR_NUM)
         ]
         self.motor_labels = [] # 存储UI标签引用以便更新
+        self.referee_labels = {}
+        self.referee_data = {
+            'status': 0,
+            'remaining_time': 0,
+            'dart_info': 0,
+            'launch_status': 0,
+            'target_change_time': 0,
+            'latest_launch_cmd_time': 0,
+            'seq': 0,
+        }
         
         # 模式映射
         self.modes = {
@@ -89,6 +103,11 @@ class MotorControlApp:
         frame_dart.pack(fill="x", padx=5, pady=5)
         
         self.create_dart_params_panel(frame_dart)
+
+        frame_referee = ttk.LabelFrame(left_pane, text="Referee Feedback (0x82)")
+        frame_referee.pack(fill="x", padx=5, pady=5)
+
+        self.create_referee_panel(frame_referee)
         
         # 右侧：原有控制面板
         frame_control = ttk.Frame(paned)
@@ -128,6 +147,23 @@ class MotorControlApp:
         btn_exec = ttk.Button(frame_action, text="Run Continuous Launch (Task 4)", 
                               command=self.action_run_task_4)
         btn_exec.pack(fill="x", padx=10)
+
+    def create_referee_panel(self, parent):
+        fields = [
+            ("Status", 'status'),
+            ("DartRemainTime", 'remaining_time'),
+            ("DartInfo", 'dart_info'),
+            ("LaunchOpenStatus", 'launch_status'),
+            ("TargetChangeTime", 'target_change_time'),
+            ("LatestLaunchCmd", 'latest_launch_cmd_time'),
+            ("Seq", 'seq'),
+        ]
+
+        for row, (title, key) in enumerate(fields):
+            ttk.Label(parent, text=title + ":", font=('', 9, 'bold')).grid(row=row, column=0, padx=4, pady=2, sticky="w")
+            value_lbl = ttk.Label(parent, text="0", font=('', 9))
+            value_lbl.grid(row=row, column=1, padx=4, pady=2, sticky="w")
+            self.referee_labels[key] = value_lbl
 
     def set_dart_param(self, dart_id):
         # Protocol: 
@@ -457,7 +493,10 @@ class MotorControlApp:
     def rx_task(self):
         # 接收缓冲区
         rx_buffer = b''
-        PACKET_LEN = 14 # Updated to 14 bytes to include total_angle
+        frame_lens = {
+            MOTOR_FRAME_HEADER: MOTOR_FRAME_LEN,
+            REFEREE_FRAME_HEADER: REFEREE_FRAME_LEN,
+        }
         
         while self.connected:
             try:
@@ -466,28 +505,24 @@ class MotorControlApp:
                     rx_buffer += data
                     
                     # 尝试解析完整数据包
-                    while len(rx_buffer) >= PACKET_LEN:
-                        # 寻找帧头 0x81
-                        if rx_buffer[0] != 0x81:
-                            # 优化: 使用 index 快速跳过无效数据，而不是切片遍历
-                            try:
-                                idx = rx_buffer.index(0x81)
-                                rx_buffer = rx_buffer[idx:]
-                            except ValueError:
-                                # 缓冲区内没有帧头，清空（或保留最后几个字节以防分包，这里简化处理）
-                                rx_buffer = b''
-                                break
+                    while len(rx_buffer) >= 1:
+                        if rx_buffer[0] not in frame_lens:
+                            rx_buffer = rx_buffer[1:]
                             continue
-                        
-                        # 再次检查长度（可能跳过数据后不足一包）
-                        if len(rx_buffer) < PACKET_LEN:
+
+                        frame_type = rx_buffer[0]
+                        packet_len = frame_lens[frame_type]
+
+                        if len(rx_buffer) < packet_len:
                             break
 
-                        # 取出一个包
-                        packet = rx_buffer[:PACKET_LEN]
-                        rx_buffer = rx_buffer[PACKET_LEN:]
-                        
-                        self.parse_feedback(packet)
+                        packet = rx_buffer[:packet_len]
+                        rx_buffer = rx_buffer[packet_len:]
+
+                        if frame_type == MOTOR_FRAME_HEADER:
+                            self.parse_feedback(packet)
+                        elif frame_type == REFEREE_FRAME_HEADER:
+                            self.parse_referee_feedback(packet)
                 else:
                     time.sleep(0.002) # 稍微增加休眠以降低CPU占用
             except Exception as e:
@@ -541,6 +576,33 @@ class MotorControlApp:
         except Exception as e:
             print(f"Parse Error: {e}")
 
+    def parse_referee_feedback(self, packet):
+        try:
+            if len(packet) != REFEREE_FRAME_LEN:
+                return
+
+            status = packet[1]
+            remaining_time = packet[2]
+            dart_info = (packet[3] << 8) | packet[4]
+            launch_status = packet[5]
+            target_change_time = (packet[7] << 8) | packet[8]
+            latest_launch_cmd_time = (packet[9] << 8) | packet[10]
+            seq = packet[11]
+
+            with self.lock:
+                self.referee_data.update({
+                    'status': status,
+                    'remaining_time': remaining_time,
+                    'dart_info': dart_info,
+                    'launch_status': launch_status,
+                    'target_change_time': target_change_time,
+                    'latest_launch_cmd_time': latest_launch_cmd_time,
+                    'seq': seq,
+                })
+
+        except Exception as e:
+            print(f"Referee Parse Error: {e}")
+
     def update_monitor_ui(self):
         # 在主线程更新UI
         with self.lock:
@@ -576,6 +638,20 @@ class MotorControlApp:
                     # Update Total Angle Label
                     if 'total_angle' in labels:
                         labels['total_angle'].config(text=str(data.get('total_angle', 0)))
+
+            if self.referee_labels:
+                status_map = {
+                    0: "Offline",
+                    1: "Online",
+                    2: "Error",
+                }
+                self.referee_labels['status'].config(text=status_map.get(self.referee_data['status'], str(self.referee_data['status'])))
+                self.referee_labels['remaining_time'].config(text=str(self.referee_data['remaining_time']))
+                self.referee_labels['dart_info'].config(text=f"0x{self.referee_data['dart_info']:04X}")
+                self.referee_labels['launch_status'].config(text=str(self.referee_data['launch_status']))
+                self.referee_labels['target_change_time'].config(text=str(self.referee_data['target_change_time']))
+                self.referee_labels['latest_launch_cmd_time'].config(text=str(self.referee_data['latest_launch_cmd_time']))
+                self.referee_labels['seq'].config(text=str(self.referee_data['seq']))
 
         # 循环调用自己
         self.root.after(100, self.update_monitor_ui)
