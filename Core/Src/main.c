@@ -105,7 +105,8 @@ typedef struct{
 /* USER CODE BEGIN PD */
   #define MOTOR_SEND_NUM 3
   #define MOTOR_NUM 7
-  #define RPM_FILTER_ALPHA 0.25f//转速滤波器系数，调整转速滤波，0到1之间，0表示不滤波，1表示完全滤波
+  #define RPM_KF_Q 0.7f//卡尔曼过程噪声，越大模型越不可信任，越依赖测量值
+  #define RPM_KF_R 10.0f//卡尔曼测量噪声，越大测量值越不可信任，越依赖模型预测值
   #define TORQUE_FILTER_ALPHA 0.30f//转矩滤波器系数，调整转矩滤波，0到1之间，0表示不滤波，1表示完全滤波
 /* USER CODE END PD */
 
@@ -394,23 +395,24 @@ void RecReceiveMotor(Motor *motor,uint8_t *data){//接收对应的电机数据
 }
 
 // 在任务上下文中做滤波，避免在中断里执行浮点运算
-void MotorFilterUpdate(Motor *motor)
+void MotorFilterUpdate(Motor *motor)//将滤波值更新到电机中
 {
   if (motor == NULL) {
     return;
   }
 
-  // 临时排查HardFault：先完全旁路Filter，直接使用原始反馈值
-  // if ((motor->motorState.rpmFilter.magic != FILTER_MAGIC) || (motor->motorState.torqueFilter.magic != FILTER_MAGIC)) {
-  //   return;
-  // }
-  // Filter_update(&motor->motorState.rpmFilter, (float)motor->motorState.rpmRaw);
-  // Filter_update(&motor->motorState.torqueFilter, (float)motor->motorState.torqueRaw);
-  // motor->motorState.rpm = (double)Filter_get_output(&motor->motorState.rpmFilter);
-  // motor->motorState.torque = (double)Filter_get_output(&motor->motorState.torqueFilter);
+  if (motor->motorState.rpmFilter.magic != FILTER_MAGIC) {
+    Filter_Init(&motor->motorState.rpmFilter, Fiter_Type_KF, RPM_KF_Q, RPM_KF_R); // rpm用卡尔曼滤波
+  }
+  if (motor->motorState.torqueFilter.magic != FILTER_MAGIC) {
+    Filter_Init(&motor->motorState.torqueFilter, Fiter_Type_LPF, TORQUE_FILTER_ALPHA, 100.0f); // 100Hz采样率
+  }
 
-  motor->motorState.rpm = motor->motorState.rpmRaw;
-  motor->motorState.torque = motor->motorState.torqueRaw;
+  Filter_update(&motor->motorState.rpmFilter, (float)motor->motorState.rpmRaw);
+  Filter_update(&motor->motorState.torqueFilter, (float)motor->motorState.torqueRaw);
+
+  motor->motorState.rpm = (double)Filter_get_output(&motor->motorState.rpmFilter);
+  motor->motorState.torque = (double)Filter_get_output(&motor->motorState.torqueFilter);
 }
 
 //根据电机的StdId来决定发送到哪个MotorSend结构体中
@@ -506,9 +508,8 @@ void MotorInit(Motor *motor,uint32_t StdId,uint8_t motor_byte)
   motor->torquePid.outputAdress = NULL;
 
   // 初始化滤波器
-  // 临时排查HardFault：先注释Filter初始化
-  // (void)Filter_Init(&motor->motorState.rpmFilter, Fiter_Type_LPF, RPM_FILTER_ALPHA, 0.0f);//这里采用低通滤波
-  // (void)Filter_Init(&motor->motorState.torqueFilter, Fiter_Type_LPF, TORQUE_FILTER_ALPHA, 0.0f);
+  (void)Filter_Init(&motor->motorState.rpmFilter, Fiter_Type_KF, RPM_KF_Q, RPM_KF_R);//rpm采用卡尔曼滤波
+  (void)Filter_Init(&motor->motorState.torqueFilter, Fiter_Type_LPF, TORQUE_FILTER_ALPHA, 100.0f);
 }
 void MotorSafetyInit(Motor *motor, uint8_t maxTemp, double maxTorque, double stallOutput, double stallSpeedThreshold, uint32_t stallTimeThreshold){
   motor->maxTemp = maxTemp;
@@ -554,6 +555,7 @@ void MotorSetOutput(Motor *motor, enum MotorMode mode, double value){
     motor->anglePid.outputAdress = &motor->output;
     break;
   case speedMode:
+  case speedTimeMode:
     motor->speedPid.setpoint = value;
     motor->speedPid.inputAdress = &motor->motorState.rpm;
     motor->speedPid.outputAdress = &motor->output;
@@ -579,6 +581,8 @@ void MotorRunToStall(Motor *motor, double speed){
   //enum MotorMode lastMode = motor->motorState.motorMode;
   motor->motorState.motorMode = speedMode;
   motor->speedPid.setpoint = speed;
+  motor->speedPid.inputAdress = &motor->motorState.rpm;
+  motor->speedPid.outputAdress = &motor->output;
   while(motor->motorState.isStalled==0){
     osDelay(1);
   }
@@ -595,6 +599,8 @@ void MotorRunToAngleBlocking(Motor *motor, double angle, double speed){
   if(motor->motorState.angle < angle){
     motor->motorState.motorMode = speedMode;
     motor->speedPid.setpoint = fabs(speed);
+    motor->speedPid.inputAdress = &motor->motorState.rpm;
+    motor->speedPid.outputAdress = &motor->output;
     while(motor->motorState.angle < angle){
       if(motor->motorState.isStalled) break; // 堵转检测
       osDelay(1);
@@ -602,6 +608,8 @@ void MotorRunToAngleBlocking(Motor *motor, double angle, double speed){
   }else{
     motor->motorState.motorMode = speedMode;
     motor->speedPid.setpoint = -fabs(speed);
+    motor->speedPid.inputAdress = &motor->motorState.rpm;
+    motor->speedPid.outputAdress = &motor->output;
     while(motor->motorState.angle > angle){
       if(motor->motorState.isStalled) break; // 堵转检测
       osDelay(1);

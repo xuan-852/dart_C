@@ -1,31 +1,11 @@
 #include "Filter.h"
-
 #include <stddef.h>
 
-static const int FILTER_MOVING_AVG_LEN = 3;
+static const int FILTER_MOVING_AVG_LEN = 5;
 
 static int filter_is_valid(const filter_t *me)
 {
     return (me != NULL) && (me->magic == FILTER_MAGIC);
-}
-
-static float get_smoothing_alpha(const filter_t *me)//进行限制，确保alpha在0到1之间
-{
-    float alpha;
-
-    if (!filter_is_valid(me)) {
-        return 1.0f;
-    }
-
-    alpha = me->cutoff_freq;//截止频率
-    if (alpha <= 0.0f) {
-        alpha = 1.0f;
-    }
-    if (alpha > 1.0f) {
-        alpha = 1.0f;
-    }
-
-    return alpha;
 }
 
 static void update_history(filter_t *me, float input)
@@ -51,31 +31,41 @@ static float calculate_average(const filter_t *me)
 {
     float sum = 0.0f;
     int i;
+    int count;
 
     if (!filter_is_valid(me) || (me->history == NULL) || (me->history_len <= 0) || (me->history_len > FILTER_HISTORY_MAX_LEN)) {
         return 0.0f;
     }
 
-    for (i = 0; i < me->history_len; i++) {
+    count = me->history_count;
+    if (count <= 0) {
+        return 0.0f;
+    }
+    if (count > me->history_len) {
+        count = me->history_len;
+    }
+
+    for (i = 0; i < count; i++) {
         sum += me->history[i];
     }
 
-    return sum / (float)me->history_len;
+    return sum / (float)count;
 }
 
+// 真正的滑动平均滤波
 static void avg_update(filter_t *me, float input)
 {
-    float avg_value;
-    float alpha;
-
-    if (!filter_is_valid(me) || (me->history == NULL) || (me->history_len <= 0) || (me->history_len > FILTER_HISTORY_MAX_LEN)) {
+    if (!filter_is_valid(me)) {
         return;
     }
 
     update_history(me, input);
-    avg_value = calculate_average(me);
-    alpha = get_smoothing_alpha(me);
-    me->last_output = me->last_output + alpha * (avg_value - me->last_output);
+
+    if (me->history_count < me->history_len) {
+        me->history_count++;
+    }
+
+    me->last_output = calculate_average(me);
 }
 
 static float avg_get_output(filter_t *me)
@@ -87,11 +77,46 @@ static float avg_get_output(filter_t *me)
     return me->last_output;
 }
 
+static void kalman_update(filter_t *me, float input)
+{
+    float p_pred;
+
+    if (!filter_is_valid(me)) {
+        return;
+    }
+
+    if (me->kalman_p <= 1.0f && me->kalman_x == 0.0f) {
+        me->kalman_x = input;
+        me->last_output = input;
+        me->kalman_p = 1.0f;
+        return;
+    }
+
+    p_pred = me->kalman_p + me->kalman_q;
+    me->kalman_k = p_pred / (p_pred + me->kalman_r);
+    me->kalman_x = me->kalman_x + me->kalman_k * (input - me->kalman_x);
+    me->kalman_p = (1.0f - me->kalman_k) * p_pred;
+    me->last_output = me->kalman_x;
+}
+
+static float kalman_get_output(filter_t *me)
+{
+    if (!filter_is_valid(me)) {
+        return 0.0f;
+    }
+
+    return me->kalman_x;
+}
+
 int Filter_Init(filter_t *me, filter_type_t type, float cutoff_freq, float sample_rate)
 {
     static filter_ops_t avg_ops = {
         .update = avg_update,
         .get_output = avg_get_output
+    };
+    static filter_ops_t kalman_ops = {
+        .update = kalman_update,
+        .get_output = kalman_get_output
     };
     int i;
 
@@ -103,7 +128,19 @@ int Filter_Init(filter_t *me, filter_type_t type, float cutoff_freq, float sampl
     me->cutoff_freq = cutoff_freq;
     me->sample_rate = sample_rate;
     me->history_len = FILTER_MOVING_AVG_LEN;
+    me->history_count = 0;
     me->last_output = 0.0f;
+    me->kalman_q = cutoff_freq;
+    me->kalman_r = sample_rate;
+    if (me->kalman_q <= 0.0f) {
+        me->kalman_q = 0.01f;
+    }
+    if (me->kalman_r <= 0.0f) {
+        me->kalman_r = 1.0f;
+    }
+    me->kalman_p = 1.0f;
+    me->kalman_x = 0.0f;
+    me->kalman_k = 0.0f;
 
     me->history = me->history_buf;
 
@@ -111,7 +148,11 @@ int Filter_Init(filter_t *me, filter_type_t type, float cutoff_freq, float sampl
         me->history[i] = 0.0f;
     }
 
-    me->ops = &avg_ops;
+    if (type == Fiter_Type_KF) {
+        me->ops = &kalman_ops;
+    } else {
+        me->ops = &avg_ops;
+    }
     me->magic = FILTER_MAGIC;
 
     return 0;
@@ -143,6 +184,7 @@ void Filter_deinit(filter_t *me)
 
     me->history = NULL;
     me->history_len = 0;
+    me->history_count = 0;
     me->last_output = 0.0f;
     me->ops = NULL;
     me->magic = 0;
