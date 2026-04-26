@@ -73,6 +73,9 @@ typedef struct{
   enum MotorMode motorMode;
   uint8_t isStalled; // 是否堵转
   uint32_t stallTimer; // 堵转计时
+  uint32_t lastRxTick; // 最近一次收到CAN反馈的时间戳
+  uint8_t isOnline; // CAN反馈在线状态
+  uint32_t onlineSinceTick; // 最近一次上线时间戳，用于上电后保护判定延时
 }MotorState;//存储电机状态的结构体
 
 typedef struct{
@@ -109,6 +112,8 @@ typedef struct{
   #define RPM_KF_R 10.0f//卡尔曼测量噪声，越大测量值越不可信任，越依赖模型预测值
   #define TORQUE_FILTER_ALPHA 0.30f//转矩滤波器系数，调整转矩滤波，0到1之间，0表示不滤波，1表示完全滤波
   #define BUZZER_ALERT_FREQ_HZ 1450U // 日常报警蜂鸣器频率，避免与电调告警音相近
+  #define MOTOR_OFFLINE_TIMEOUT_MS 100U // 超过该时间未收到反馈则判定离线
+  #define MOTOR_ONLINE_WARMUP_MS 800U // 电机重新上电后的保护判定预热时间
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -241,11 +246,7 @@ int main(void)
      // 启动失败处理
      Error_Handler();
   }
-  if (HAL_CAN_Start(&hcan1) != HAL_OK)
-  {
-     // 启动失败处理
-     Error_Handler();
-  }
+    // CAN1 当前未挂载设备，不启动
   HAL_TIM_Base_Start_IT(&htim2); 
 
   htim2.Instance->ARR = 999;//设置自动重装载值，决定发送频率，999对应100Hz
@@ -373,9 +374,6 @@ void CAN_SendMessage(uint8_t *data, uint32_t StdId) {
   if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, data, &TxMailbox) != HAL_OK) {//发送函数
     //Error_Handler();
   }
-  if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, data, &TxMailbox) != HAL_OK) {
-    //Error_Handler();
-  }
 }
 
 //发送对应的MotorSend结构体
@@ -391,6 +389,11 @@ void RecReceiveMotor(Motor *motor,uint8_t *data){//接收对应的电机数据
   motor->motorState.torqueRaw = (double)torque_raw;
 
   motor->motorState.tempr=(int8_t)data[6];
+  if (motor->motorState.isOnline == 0U) {
+    motor->motorState.onlineSinceTick = HAL_GetTick();
+  }
+  motor->motorState.lastRxTick = HAL_GetTick();
+  motor->motorState.isOnline = 1;
   int deltaAngle = (int)(((uint16_t)data[0]<<8)|data[1])-(int)motor->motorState.singleAngle;//角度增量
   motor->motorState.singleAngle = ((uint16_t)data[0]<<8)|data[1];//记录当前角度
   if(abs(deltaAngle) < 4096) motor->motorState.angle += deltaAngle;
@@ -505,6 +508,9 @@ void MotorInit(Motor *motor,uint32_t StdId,uint8_t motor_byte)
   motor->stallTimeThreshold = 500;
   motor->motorState.isStalled = 0;
   motor->motorState.stallTimer = 0;
+  motor->motorState.lastRxTick = HAL_GetTick();
+  motor->motorState.isOnline = 0;
+  motor->motorState.onlineSinceTick = 0;
   motor->targetAngle = 0;
   motor->runSpeed = 0;
   motor->runTime = 0;
@@ -672,7 +678,7 @@ void MotorCdcFeedback(uint8_t motor_SN){
   feedback[6]=(int16_t)motor->motorState.torque>>8;
   feedback[7]=(int16_t)motor->motorState.torque&0xFF;
   feedback[8]=motor->motorState.tempr;
-  feedback[9]=(motor->enabled<<7|motor->motorState.isStalled<<6|motor->motorState.motorMode<<5);
+  feedback[9]=(uint8_t)((motor->enabled << 7) | (motor->motorState.isStalled << 6) | (motor->motorState.motorMode & 0x3F));
   feedback[10]=(int32_t)motor->motorState.angle>>24;
   feedback[11]=(int32_t)motor->motorState.angle>>16;
   feedback[12]=(int32_t)motor->motorState.angle>>8;
@@ -763,6 +769,9 @@ void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
         uint8_t mode_val = Buf[2];
         
         if (motor_id < MOTOR_NUM) {
+             motor_array[motor_id]->enabled = 1;
+             motor_array[motor_id]->motorState.isStalled = 0;
+             motor_array[motor_id]->motorState.stallTimer = 0;
              if (mode_val <= 4) {
                  // 立即设置 (非阻塞)
                  // Byte 3-4: Value (int16, Big Endian)
@@ -817,13 +826,22 @@ void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)
     else if (Len >= 2 && Buf[0] == 0x01) {
         // System Command
         // Byte 1: 0x00 = Emergency Stop -> alarm_level=3, disable all motors
-        // Byte 1: Other = Set RunningTask
+      // Byte 1: 0x01~0x7F = Set RunningTask
+      // Byte 1: 0xFE = Clear safety latch and re-enable all motors
         
         if (Buf[1] == 0x00) {
             alarm_level = 3;
             for(int i=0; i<MOTOR_NUM; i++){
                 motor_array[i]->enabled = 0;
             }
+      } else if (Buf[1] == 0xFE) {
+        alarm_level = 0;
+        alarm_motor = -1;
+        for(int i=0; i<MOTOR_NUM; i++){
+          motor_array[i]->enabled = 1;
+          motor_array[i]->motorState.isStalled = 0;
+          motor_array[i]->motorState.stallTimer = 0;
+        }
         } else {
             RunningTask = Buf[1];
         }
@@ -984,6 +1002,30 @@ void MotorUpdate(void const * argument)
 
     for(int i=0;i<MOTOR_NUM;i++){
       Motor *m = motor_array[i];//遍历每一个电机来更新数据
+      uint32_t now = HAL_GetTick();
+      uint8_t was_online = m->motorState.isOnline;
+      uint8_t is_online_stable;
+
+      if ((now - m->motorState.lastRxTick) > MOTOR_OFFLINE_TIMEOUT_MS) {
+        m->motorState.isOnline = 0;
+      }
+
+      if (m->motorState.isOnline == 0) {
+        // 电机掉电或总线断开时，清空观测量并复位堵转状态
+        // 不强制清零输出，避免上位机已下发控制但因延迟上电被永久压制
+        m->motorState.rpmRaw = 0;
+        m->motorState.torqueRaw = 0;
+        m->motorState.rpm = 0;
+        m->motorState.torque = 0;
+        m->motorState.stallTimer = 0;
+        m->motorState.isStalled = 0;
+      } else if (was_online == 0) {
+        // 重新收到反馈后，自动解除离线期可能出现的保护锁定
+        m->enabled = 1;
+      }
+
+      is_online_stable = (uint8_t)(m->motorState.isOnline && ((now - m->motorState.onlineSinceTick) >= MOTOR_ONLINE_WARMUP_MS));
+
       MotorFilterUpdate(m);
       // PID calculation moved to StartPidTask
       if(m->motorState.motorMode == disable){
@@ -1036,7 +1078,7 @@ void MotorUpdate(void const * argument)
       // 1. 堵转检测
       // 使用最终输出电流值(m->output)和转速(m->motorState.rpm)进行判断
       uint8_t prev_stalled = m->motorState.isStalled;
-      if (fabs(m->output) > m->stallOutput && fabs(m->motorState.rpm) < m->stallSpeedThreshold) {
+          if (is_online_stable && fabs(m->output) > m->stallOutput && fabs(m->motorState.rpm) < m->stallSpeedThreshold) {
           m->motorState.stallTimer++;
       } else {
           m->motorState.stallTimer = 0;
@@ -1060,14 +1102,14 @@ void MotorUpdate(void const * argument)
 
       // 2. 阈值保护 (温度 > 阈值 OR (转矩 > 阈值(瞬间)))
       // 注意：堵转(isStalled)不再触发禁用或报警
-      if (m->motorState.tempr > m->maxTemp){
+      if (is_online_stable && m->motorState.tempr > m->maxTemp){
         m->enabled = 0; // 立即禁用电机
         if (alarm_level < 1) alarm_level = 1; // 仅升级报警等级，不降级
         alarm_motor = i+1;
         alarm_counter++;
       }
       
-      if (fabs(m->motorState.torque) > m->maxTorque) {
+      if (is_online_stable && fabs(m->motorState.torque) > m->maxTorque) {
         m->enabled = 0; // 立即禁用电机
         if (alarm_level < 2) alarm_level = 2; // 仅升级报警等级，不降级（扭矩优于温度）
         alarm_motor = i+1;

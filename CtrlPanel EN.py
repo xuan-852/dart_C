@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
 import time
+from enum import IntEnum
 
 # 配置
 # DEFAULT_PORT = 'COM27'
@@ -14,6 +15,17 @@ MOTOR_FRAME_HEADER = 0x81
 REFEREE_FRAME_HEADER = 0x82
 MOTOR_FRAME_LEN = 14
 REFEREE_FRAME_LEN = 12
+
+
+class MotorMode(IntEnum):
+    DISABLE = 0
+    CURRENT = 1
+    ANGLE = 2
+    SPEED = 3
+    TORQUE = 4
+    RUN_TO_STALL = 5
+    RUN_TO_ANGLE = 6
+    SPEED_TIME = 7
 
 class MotorControlApp:
     def __init__(self, root):
@@ -57,14 +69,14 @@ class MotorControlApp:
         
         # 模式映射
         self.modes = {
-            "Disable (0x00)": 0,
-            "Current (0x01)": 1,
-            "Angle (0x02)": 2,
-            "Speed (0x03)": 3,
-            "Torque (0x04)": 4,
-            "RunToStall (0x05)": 5,
-            "RunToAngle (0x06)": 6,
-            "SpeedTime (0x07)": 7
+            "Disable": MotorMode.DISABLE,
+            "Current": MotorMode.CURRENT,
+            "Angle": MotorMode.ANGLE,
+            "Speed": MotorMode.SPEED,
+            "Torque": MotorMode.TORQUE,
+            "RunToStall": MotorMode.RUN_TO_STALL,
+            "RunToAngle": MotorMode.RUN_TO_ANGLE,
+            "SpeedTime": MotorMode.SPEED_TIME
         }
 
         # 飞镖参数存储 (Yaw, V1, V2)
@@ -250,7 +262,7 @@ class MotorControlApp:
             lbl_stat.grid(row=i+1, column=1, padx=2, pady=2)
             
             # Mode
-            lbl_mode = ttk.Label(scrollable_frame, text="0", font=('Arial', 9), width=3)
+            lbl_mode = ttk.Label(scrollable_frame, text="DISABLE", font=('Arial', 9), width=12)
             lbl_mode.grid(row=i+1, column=2, padx=2, pady=2)
             
             # Angle
@@ -624,7 +636,7 @@ class MotorControlApp:
                         status_color = "gray"
                         
                     labels['stat'].config(text=status_text, foreground=status_color)
-                    labels['mode'].config(text=str(data['mode']))
+                    labels['mode'].config(text=self.mode_name(data['mode']))
                     labels['angle'].config(text=str(data['angle']))
                     labels['rpm'].config(text=str(data['rpm']))
                     labels['trq'].config(text=str(data['torque']))
@@ -685,17 +697,17 @@ class MotorControlApp:
             
             # Simple packet for standard modes + mode 5
             # Mode 5 uses same structure (val interpreted as speed)
-            if mode == 7:
+            if mode == MotorMode.SPEED_TIME:
                 # Mode 7: SpeedTimeMode
                 # Speed (int16), Time (uint32)
                 time_ms = int(self.time_var.get())
                 packet_data = struct.pack('>hI', val, time_ms)
-                self.send_raw_packet(mid, mode, packet_data)
-                self.log(f"Sent ID:{mid} Mode:{mode} Speed:{val} Time:{time_ms}")
+                self.send_raw_packet(mid, int(mode), packet_data)
+                self.log(f"Sent ID:{mid} Mode:{mode.name} Speed:{val} Time:{time_ms}")
             else:
                 packet_data = struct.pack('>h', val)
-                self.send_raw_packet(mid, mode, packet_data)
-                self.log(f"Sent ID:{mid} Mode:{mode} Val:{val}")
+                self.send_raw_packet(mid, int(mode), packet_data)
+                self.log(f"Sent ID:{mid} Mode:{mode.name} Val:{val}")
             
         except ValueError:
             messagebox.showerror("Error", "Invalid value format")
@@ -868,10 +880,14 @@ class MotorControlApp:
         self.log(f"Set Yaw: {int(self.yaw_angle_var.get())} (Raw: {int(angle)})", "purple")
 
     def stop_motor(self):
-        current_mode = self.mode_var.get()
-        self.mode_var.set("Disable (0x00)")
         self.value_var.set(0)
-        self.send_packet()
+        self.action_emergency_stop()
+
+    def mode_name(self, mode_value):
+        try:
+            return MotorMode(int(mode_value)).name
+        except Exception:
+            return str(mode_value)
 
     def log(self, msg, color="black"):
         if self.log_text:
