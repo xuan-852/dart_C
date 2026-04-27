@@ -711,8 +711,16 @@ void MotorCdcFeedback(uint8_t motor_SN){
 
 void RefereeCdcFeedback(void){
   static uint8_t seq = 0;
-  uint8_t feedback[12];
+  uint8_t feedback[21];
   referee_status_t status = Referee_GetStatus(&g_referee);
+  uint8_t has_flags = 0;
+
+  if (g_referee.dart.has_dart_info != 0U) {
+    has_flags |= 0x01U;
+  }
+  if (g_referee.dart.has_dart_client_cmd != 0U) {
+    has_flags |= 0x02U;
+  }
 
   feedback[0] = 0x82;
   feedback[1] = (uint8_t)status;
@@ -726,8 +734,17 @@ void RefereeCdcFeedback(void){
   feedback[9] = (uint8_t)(g_dart_cmd_cache.latest_launch_cmd_time >> 8);
   feedback[10] = (uint8_t)(g_dart_cmd_cache.latest_launch_cmd_time & 0xFF);
   feedback[11] = seq++;
+  feedback[12] = has_flags;
+  feedback[13] = (uint8_t)(g_referee.runtime.parse_ok_count >> 24);
+  feedback[14] = (uint8_t)(g_referee.runtime.parse_ok_count >> 16);
+  feedback[15] = (uint8_t)(g_referee.runtime.parse_ok_count >> 8);
+  feedback[16] = (uint8_t)(g_referee.runtime.parse_ok_count & 0xFF);
+  feedback[17] = (uint8_t)(g_referee.runtime.parse_err_count >> 24);
+  feedback[18] = (uint8_t)(g_referee.runtime.parse_err_count >> 16);
+  feedback[19] = (uint8_t)(g_referee.runtime.parse_err_count >> 8);
+  feedback[20] = (uint8_t)(g_referee.runtime.parse_err_count & 0xFF);
 
-  CDC_Transmit_FS(feedback, 12);
+  CDC_Transmit_FS(feedback, 21);
 }
 
 void CDC_Receive_Callback(uint8_t *Buf, uint32_t Len)

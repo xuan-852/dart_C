@@ -14,7 +14,7 @@ MOTOR_NUM = 7
 MOTOR_FRAME_HEADER = 0x81
 REFEREE_FRAME_HEADER = 0x82
 MOTOR_FRAME_LEN = 14
-REFEREE_FRAME_LEN = 12
+REFEREE_FRAME_LEN = 21
 
 
 class MotorMode(IntEnum):
@@ -65,6 +65,9 @@ class MotorControlApp:
             'target_change_time': 0,
             'latest_launch_cmd_time': 0,
             'seq': 0,
+            'has_flags': 0,
+            'parse_ok_count': 0,
+            'parse_err_count': 0,
         }
         
         # 模式映射
@@ -169,6 +172,9 @@ class MotorControlApp:
             ("TargetChangeTime", 'target_change_time'),
             ("LatestLaunchCmd", 'latest_launch_cmd_time'),
             ("Seq", 'seq'),
+            ("HasFlags", 'has_flags'),
+            ("ParseOK", 'parse_ok_count'),
+            ("ParseErr", 'parse_err_count'),
         ]
 
         for row, (title, key) in enumerate(fields):
@@ -600,6 +606,9 @@ class MotorControlApp:
             target_change_time = (packet[7] << 8) | packet[8]
             latest_launch_cmd_time = (packet[9] << 8) | packet[10]
             seq = packet[11]
+            has_flags = packet[12]
+            parse_ok_count = (packet[13] << 24) | (packet[14] << 16) | (packet[15] << 8) | packet[16]
+            parse_err_count = (packet[17] << 24) | (packet[18] << 16) | (packet[19] << 8) | packet[20]
 
             with self.lock:
                 self.referee_data.update({
@@ -610,6 +619,9 @@ class MotorControlApp:
                     'target_change_time': target_change_time,
                     'latest_launch_cmd_time': latest_launch_cmd_time,
                     'seq': seq,
+                    'has_flags': has_flags,
+                    'parse_ok_count': parse_ok_count,
+                    'parse_err_count': parse_err_count,
                 })
 
         except Exception as e:
@@ -664,6 +676,9 @@ class MotorControlApp:
                 self.referee_labels['target_change_time'].config(text=str(self.referee_data['target_change_time']))
                 self.referee_labels['latest_launch_cmd_time'].config(text=str(self.referee_data['latest_launch_cmd_time']))
                 self.referee_labels['seq'].config(text=str(self.referee_data['seq']))
+                self.referee_labels['has_flags'].config(text=f"0x{self.referee_data['has_flags']:02X}")
+                self.referee_labels['parse_ok_count'].config(text=str(self.referee_data['parse_ok_count']))
+                self.referee_labels['parse_err_count'].config(text=str(self.referee_data['parse_err_count']))
 
         # 循环调用自己
         self.root.after(100, self.update_monitor_ui)
