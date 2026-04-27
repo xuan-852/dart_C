@@ -37,7 +37,7 @@ static referee_ops_t referee_default_ops = {
 const referee_settings_t g_referee_settings_default = {
     .timeout_ms = 100,// 100ms 超时时间，超过后置离线
     .max_frame_len = 128,
-    .huart = &huart1
+    .huart = &huart6
 };
 
 const referee_runtime_t g_referee_runtime_init = {

@@ -66,7 +66,6 @@ extern void StartCdcTask(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-extern void Error_Handler(void);
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
@@ -112,23 +111,23 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of MyTask1 */
-  osThreadDef(MyTask1, MotorUpdate, osPriorityLow, 0, 1024);
+  osThreadDef(MyTask1, MotorUpdate, osPriorityLow, 0, 128);
   MyTask1Handle = osThreadCreate(osThread(MyTask1), NULL);
 
   /* definition and creation of myTask2 */
-  osThreadDef(myTask2, StartTask2, osPriorityIdle, 0, 1024);
+  osThreadDef(myTask2, StartTask2, osPriorityIdle, 0, 128);
   myTask2Handle = osThreadCreate(osThread(myTask2), NULL);
 
   /* definition and creation of PidTask */
-  osThreadDef(PidTask, StartPidTask, osPriorityIdle, 0, 512);
+  osThreadDef(PidTask, StartPidTask, osPriorityIdle, 0, 128);
   PidTaskHandle = osThreadCreate(osThread(PidTask), NULL);
 
   /* definition and creation of CdcTask */
-  osThreadDef(CdcTask, StartCdcTask, osPriorityIdle, 0, 512);
+  osThreadDef(CdcTask, StartCdcTask, osPriorityIdle, 0, 128);
   CdcTaskHandle = osThreadCreate(osThread(CdcTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

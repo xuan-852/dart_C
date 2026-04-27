@@ -232,6 +232,7 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM3_Init();
   MX_USART1_UART_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
   // 调整 CAN 接收优先级高于 TIM2 发送
 /*   HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 0, 0); 
@@ -662,6 +663,28 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     for(int i=0;i<MOTOR_NUM;i++){
       motor_array[i]->enabled=0;//将电机全部急停
     }
+  }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == NULL) {
+    return;
+  }
+
+  if (huart == g_referee.cfg.huart) {
+    (void)Referee_OnUartRxCplt(&g_referee, HAL_GetTick());
+  }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == NULL) {
+    return;
+  }
+
+  if (huart == g_referee.cfg.huart) {
+    (void)Referee_StartUartReceive(&g_referee);
   }
 }
 

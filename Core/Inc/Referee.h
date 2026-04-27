@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {//可用函数操作表
     int (*init)(referee_t *me, const referee_settings_t *cfg);
     int (*update)(referee_t *me, uint32_t now_tick);
-    int (*rx_bytes)(referee_t *me, const uint8_t *data, size_t len, uint32_t now_tick);
+    int (*rx_bytes)(referee_t *me, const uint8_t *data, size_t len, uint32_t now_tick);//接收字节
     int (*start_uart_rx)(referee_t *me);
     int (*on_uart_rx_cplt)(referee_t *me, uint32_t now_tick);
     int (*get_dart_info)(referee_t *me, ext_dart_info_t *out);
